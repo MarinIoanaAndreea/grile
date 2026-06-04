@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkpoint Exam - Adresare IP (33 intrebari)</title>
+  <style>
+    :root { --bg:#f4f7fb; --card:#fff; --text:#1f2937; --muted:#6b7280; --accent:#0ea5e9; --accent-dark:#0284c7; --border:#dbe3ef; --soft:#eef6ff; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Arial,Helvetica,sans-serif; background:linear-gradient(180deg,#eef6ff 0%,var(--bg) 240px); color:var(--text); line-height:1.5; }
+    header { max-width:1050px; margin:0 auto; padding:34px 18px 18px; }
+    h1 { margin:0 0 8px; font-size:clamp(24px,4vw,38px); }
+    .subtitle { color:var(--muted); margin:0; }
+    main { max-width:1050px; margin:0 auto; padding:12px 18px 50px; }
+    .toolbar { position:sticky; top:0; z-index:20; background:rgba(244,247,251,0.92); backdrop-filter:blur(8px); border:1px solid var(--border); border-radius:16px; padding:14px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin:0 0 18px; box-shadow:0 10px 24px rgba(15,23,42,0.06); }
+    .toolbar .score { font-weight:700; }
+    button { border:0; border-radius:12px; padding:11px 16px; font-weight:700; cursor:pointer; transition:transform .08s ease; }
+    button:hover { transform:translateY(-1px); }
+    .primary { background:var(--accent); color:white; }
+    .primary:hover { background:var(--accent-dark); }
+    .secondary { background:#e5e7eb; color:#111827; }
+    .quiz-card { background:var(--card); border:1px solid var(--border); border-radius:18px; padding:22px; margin:18px 0; box-shadow:0 10px 28px rgba(15,23,42,0.05); }
+    .q-head { display:flex; gap:12px; align-items:center; margin-bottom:10px; }
+    .badge { display:inline-flex; align-items:center; justify-content:center; min-width:42px; height:32px; padding:0 10px; border-radius:999px; background:var(--soft); color:var(--accent-dark); font-weight:800; }
+    .multi-note { color:var(--muted); font-size:14px; margin-top:6px; }
+    .question { font-size:18px; font-weight:700; margin:8px 0 14px; }
+    .options { display:grid; gap:10px; margin-top:12px; }
+    label.option { display:grid; grid-template-columns:26px 1fr; gap:12px; align-items:start; padding:13px 14px; border:1px solid var(--border); border-radius:12px; background:#fff; cursor:pointer; }
+    label.option:hover { background:#f8fafc; }
+    input { margin-top:4px; transform:scale(1.15); }
+    .feedback { display:none; margin-top:15px; padding:13px 14px; border-radius:12px; font-weight:700; }
+    .feedback.ok { display:block; background:#dcfce7; color:#14532d; border:1px solid #86efac; }
+    .feedback.bad { display:block; background:#fee2e2; color:#7f1d1d; border:1px solid #fca5a5; }
+    .correct-answer { margin-top:8px; font-weight:400; }
+    .correct-highlight { border-color:#86efac !important; background:#f0fdf4 !important; }
+    .wrong-highlight { border-color:#fca5a5 !important; background:#fff1f2 !important; }
+    footer { color:var(--muted); text-align:center; font-size:13px; padding:12px 0 34px; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Checkpoint Exam - Adresare IP</h1>
+  <p class="subtitle">Quiz interactiv cu 33 de intrebari. Bifeaza raspunsul/raspunsurile, apoi apasa Verifica raspunsurile.</p>
+</header>
+<main>
+  <section class="toolbar">
+    <div class="score" id="scoreBox">Scor: neverificat</div>
+    <div>
+      <button class="primary" onclick="checkQuiz()">Verifica raspunsurile</button>
+      <button class="secondary" onclick="resetQuiz()">Reseteaza</button>
+    </div>
+  </section>
+  <form id="quizForm"></form>
+</main>
+<footer>Fisier HTML generat pentru exersare individuala.</footer>
+<script>
+const questions = [
+  { text: "Referitor la imagine. Potriviti reteaua cu adresa IP si prefixul corect care satisface cerintele de adresare host. (Retea A=100 hosturi, Retea B=50 hosturi, Retea C=25 hosturi, Retea D=2 hosturi)", type:"multi", choose:4, options:["Retea A - 192.168.0.0/26","Retea B - 192.168.0.128/25","Retea C - 192.168.0.96/27","Retea D - 192.168.0.80/30"], answer:[0,1,2,3] },
+  { text: "Un administrator doreste sa creeze patru subretele din adresa de retea 192.168.1.0/24. Care este adresa de retea si masca celei de-a doua subretele utilizabile?", type:"single", options:["subretea 192.168.1.128 / masca 255.255.255.192","subretea 192.168.1.64 / masca 255.255.255.240","subretea 192.168.1.64 / masca 255.255.255.192","subretea 192.168.1.32 / masca 255.255.255.240"], answer:[2] },
+  { text: "Un mesaj este trimis tuturor hosturilor dintr-o retea la distanta. Ce tip de mesaj este acesta?", type:"single", options:["broadcast limitat (limited broadcast)","unicast","multicast","broadcast directionat (directed broadcast)"], answer:[3] },
+  { text: "Referitor la imagine. Un administrator trebuie sa trimita un mesaj tuturor din reteaua routerului A. Care este adresa de broadcast pentru reteaua 172.16.16.0/22?", type:"single", options:["172.16.19.255","172.16.23.255","172.16.20.255","172.16.255.255","172.16.16.255"], answer:[0] },
+  { text: "Unui administrator i s-a spus ca o anumita retea trebuie sa acomodeze 126 de hosturi. Ce masca de subretea ar contine numarul necesar de biti de host?", type:"single", options:["255.255.255.224","255.255.255.0","255.255.255.128","255.255.255.240"], answer:[2] },
+  { text: "Cate adrese de host sunt disponibile in reteaua 192.168.10.128/26?", type:"single", options:["32","30","60","64","62"], answer:[4] },
+  { text: "Ce interval de prefixe de adrese este rezervat pentru multicast IPv4?", type:"single", options:["127.0.0.0 - 127.255.255.255","224.0.0.0 - 239.255.255.255","169.254.0.0 - 169.254.255.255","240.0.0.0 - 254.255.255.255"], answer:[1] },
+  { text: "Cate adrese de host sunt disponibile in reteaua 172.16.128.0 cu masca de subretea 255.255.252.0?", type:"single", options:["1022","1024","2046","512","510","2048"], answer:[0] },
+  { text: "Referitor la imagine. Ramanand in intervalul retelei 10.16.10.0/24, ce adresa de subretea ar putea fi atribuita retelei cu 25 de hosturi? (Deja folosite: 10.16.10.0/26 si 10.16.10.192/28)", type:"single", options:["10.16.10.224/26","10.16.10.64/27","10.16.10.128/28","10.16.10.160/26","10.16.10.240/28","10.16.10.240/27"], answer:[1] },
+  { text: "Cati biti trebuie imprumutati din portiunea de host a unei adrese pentru a acomoda un router cu cinci retele conectate?", type:"single", options:["cinci","doi","patru","trei"], answer:[3] },
+  { text: "Care trei adrese sunt adrese publice valide? (Alege trei.)", type:"multi", choose:3, options:["64.104.78.227","10.15.250.5","192.168.1.245","198.133.219.17","128.107.12.117","172.31.1.25"], answer:[0,3,4] },
+  { text: "Ce prefix IPv6 este rezervat pentru comunicarea intre dispozitive din acelasi link?", type:"single", options:["2001::/32","FE80::/10","FC00::/7","FDFF::/7"], answer:[1] },
+  { text: "Ce este folosit in procesul EUI-64 pentru a crea un ID de interfata IPv6?", type:"single", options:["o adresa hexazecimala de 64 biti generata aleator","o adresa IPv6 furnizata de un server DHCPv6","o adresa IPv4 configurata pe interfata","adresa MAC a interfetei activate IPv6"], answer:[3] },
+  { text: "Ce protocol suporta SLAAC pentru atribuirea dinamica a adreselor IPv6 unui host?", type:"single", options:["ARPv6","ICMPv6","UDP","DHCPv6"], answer:[1] },
+  { text: "Potriviti adresa IPv6 cu tipul de adresa IPv6. FF02::1 / FF02::1:FFAE:F85F / ::1 / 2001:DB8::BAF:3F57:FE94", type:"multi", choose:4, options:["FF02::1 - multicast all-node","FF02::1:FFAE:F85F - multicast solicited-node","::1 - loopback","2001:DB8::BAF:3F57:FE94 - global unicast"], answer:[0,1,2,3] },
+  { text: "Referitor la imagine. O companie implementeaza schema de adresare IPv6 (2001:DB8:1234:0000::/64). Care este numarul maxim de subretele per sub-site?", type:"single", options:["256","0","4","16"], answer:[3] },
+  { text: "Trei metode permit coexistenta IPv6 si IPv4. Potriviti fiecare metoda cu descrierea sa.", type:"multi", choose:3, options:["Pachetele IPv6 sunt convertite in pachete IPv4 si invers - traducere (translation)","Pachetele IPv4 si IPv6 coexista in aceeasi retea - dual-stack","Pachetul IPv6 este transportat in interiorul unui pachet IPv4 - tunel (tunneling)"], answer:[0,1,2] },
+  { text: "Ce tip de adresa IPv6 se refera la orice adresa unicast atribuita mai multor hosturi?", type:"single", options:["global unicast","link-local","anycast","unique local"], answer:[2] },
+  { text: "Ce serviciu ofera adresare IPv6 globala dinamica dispozitivelor finale fara a folosi un server cu evidenta adreselor disponibile?", type:"single", options:["adresare IPv6 statica","SLAAC","DHCPv6 fara stare (stateless DHCPv6)","DHCPv6 cu stare (stateful DHCPv6)"], answer:[1] },
+  { text: "Un dispozitiv IPv6 trimite un pachet cu adresa destinatie FF02::1. Care este tinta acestui pachet?", type:"single", options:["doar serverele DHCP IPv6","doar routerele configurate cu IPv6","toate dispozitivele activate IPv6 din link-ul local","singurul dispozitiv IPv6 configurat unic cu aceasta adresa"], answer:[2] },
+  { text: "Care este cea mai scurta abreviere pentru adresa IP: 3FFE:1044:0000:0000:00AB:0000:0000:0057?", type:"single", options:["3FFE:1044::00AB::0057","3FFE:1044::AB::57","3FFE:1044:0:0:AB::57","3FFE:1044:0:0:00AB::0057","3FFE:1044:0000:0000:00AB::57","3FFE:1044:0000:0000:00AB::0057"], answer:[2] },
+  { text: "Care este prefixul pentru adresa de host 2001:DB8:BC15:A:12AB::1/64?", type:"single", options:["2001:DB8:BC15:A","2001:DB8:BC15:A:1","2001:DB8:BC15:A:12","2001:DB8:BC15"], answer:[0] },
+  { text: "Dat fiind prefixul de adresa IPv6 2001:db8::/48, care va fi ultima subretea creata daca prefixul de subretea este schimbat la /52?", type:"single", options:["2001:db8:0:f000::/52","2001:db8:0:f00::/52","2001:db8:0:8000::/52","2001:db8:0:f::/52"], answer:[0] },
+  { text: "Care este scopul mesajelor ICMP?", type:"single", options:["pentru a oferi feedback despre transmisia pachetelor IP","pentru a garanta livrarea unui pachet IP","pentru a monitoriza rezolutia numelui de domeniu la adresa IP","pentru a informa routerele despre schimbarile topologiei retelei"], answer:[0] },
+  { text: "Un tehnician foloseste comanda ping 127.0.0.1. Ce testeaza tehnicianul?", type:"single", options:["stiva TCP/IP pe un host de retea","conectivitatea fizica a unui PC cu reteaua","conectivitatea intre doua PC-uri din aceeasi retea","conectivitatea intre doua dispozitive Cisco adiacente","conectivitatea intre un PC si gateway-ul implicit"], answer:[0] },
+  { text: "Ce protocol este folosit de comanda traceroute pentru a trimite si primi echo-request-uri si echo-reply-uri?", type:"single", options:["TCP","Telnet","SNMP","ICMP"], answer:[3] },
+  { text: "Ce subretea ar include adresa 192.168.1.96 ca adresa de host utilizabila?", type:"single", options:["192.168.1.64/29","192.168.1.64/26","192.168.1.32/28","192.168.1.32/27"], answer:[1] },
+  { text: "Deschideti activitatea PT. Care sunt cele trei adrese IPv6 afisate cand se urmareste ruta de la PC1 la PC2? (Alege trei.)", type:"multi", choose:3, options:["2001:DB8:1:2::1","2001:DB8:1:2::2","2001:DB8:1:4::1","2001:DB8:1:1::A","2001:DB8:1:3::1","2001:DB8:1:1::1","2001:DB8:1:3::2"], answer:[0,5,6] },
+  { text: "Potriviti fiecare descriere cu o adresa IP corespunzatoare.", type:"multi", choose:5, options:["adresa experimentala - 240.2.6.255","adresa privata - 172.19.20.5","adresa TEST-NET - 192.0.2.123","adresa link-local - 169.254.1.5","adresa loopback - 127.0.0.1"], answer:[0,1,2,3,4] },
+  { text: "Care este notatia prefix pentru masca de subretea 255.255.255.224?", type:"single", options:["/28","/27","/25","/26"], answer:[1] },
+  { text: "Un host transmite un multicast. Ce host sau hosturi il vor primi?", type:"single", options:["dispozitivele de retea conectate direct","un grup special definit de hosturi","cel mai apropiat vecin din aceeasi retea","un singur host specific"], answer:[1] },
+  { text: "Care este formatul comprimat al adresei IPv6 fe80:09ea:0000:2200:0000:0000:0fe0:0290?", type:"single", options:["fe80:9ea:0:2200::fe0:290","fe80:9ea0::2020:0:bf:e0:9290","fe80:9:20::b000:290","fe80:9ea0::2020::bf:e0:9290"], answer:[0] },
+  { text: "Un utilizator introduce comanda ping 2001:db8:FACE:39::10 si primeste un raspuns cu codul 2. Ce reprezinta acest cod?", type:"single", options:["host inaccesibil (host unreachable)","retea inaccesibila (network unreachable)","dincolo de domeniul adresei sursa (beyond scope of the source address)","protocol inaccesibil (protocol unreachable)"], answer:[2] }
+];
+
+const form = document.getElementById('quizForm');
+function renderQuiz() {
+  form.innerHTML = '';
+  questions.forEach((q, qi) => {
+    const card = document.createElement('section');
+    card.className = 'quiz-card';
+    const head = document.createElement('div');
+    head.className = 'q-head';
+    head.innerHTML = '<span class="badge">Q'+(qi+1)+'</span><strong>Intrebarea '+(qi+1)+' din '+questions.length+'</strong>';
+    card.appendChild(head);
+    const qDiv = document.createElement('div');
+    qDiv.className = 'question';
+    qDiv.textContent = q.text;
+    card.appendChild(qDiv);
+    if (q.type === 'multi') {
+      const note = document.createElement('div');
+      note.className = 'multi-note';
+      note.textContent = 'Alege ' + q.choose + ' raspunsuri.';
+      card.appendChild(note);
+    }
+    const wrap = document.createElement('div');
+    wrap.className = 'options';
+    q.options.forEach((opt, oi) => {
+      const label = document.createElement('label');
+      label.className = 'option';
+      label.setAttribute('data-q', qi);
+      label.setAttribute('data-o', oi);
+      const input = document.createElement('input');
+      input.type = q.type === 'single' ? 'radio' : 'checkbox';
+      input.name = 'q'+qi;
+      input.value = oi;
+      const span = document.createElement('span');
+      span.textContent = opt;
+      label.appendChild(input);
+      label.appendChild(span);
+      wrap.appendChild(label);
+    });
+    card.appendChild(wrap);
+    const fb = document.createElement('div');
+    fb.className = 'feedback';
+    fb.id = 'feedback-'+qi;
+    card.appendChild(fb);
+    form.appendChild(card);
+  });
+}
+function selectedFor(qi) {
+  return Array.from(document.querySelectorAll('input[name="q'+qi+'"]:checked')).map(el => Number(el.value)).sort((a,b)=>a-b);
+}
+function sameArray(a,b) { return a.length===b.length && a.every((v,i)=>v===b[i]); }
+function checkQuiz() {
+  let correctCount = 0;
+  questions.forEach((q, qi) => {
+    const selected = selectedFor(qi);
+    const answer = [...q.answer].sort((a,b)=>a-b);
+    const isCorrect = sameArray(selected, answer);
+    if (isCorrect) correctCount++;
+    document.querySelectorAll('label[data-q="'+qi+'"]').forEach(label => {
+      label.classList.remove('correct-highlight','wrong-highlight');
+      const oi = Number(label.getAttribute('data-o'));
+      if (answer.includes(oi)) label.classList.add('correct-highlight');
+      if (selected.includes(oi) && !answer.includes(oi)) label.classList.add('wrong-highlight');
+    });
+    const fb = document.getElementById('feedback-'+qi);
+    const correctText = answer.map(i => q.options[i]).join(' / ');
+    fb.className = 'feedback ' + (isCorrect ? 'ok' : 'bad');
+    fb.innerHTML = isCorrect ? 'Corect!' : 'Incorect.<div class="correct-answer">Raspuns corect: '+correctText+'</div>';
+  });
+  const percent = Math.round(correctCount/questions.length*100);
+  document.getElementById('scoreBox').textContent = 'Scor: '+correctCount+'/'+questions.length+' ('+percent+'%)';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function resetQuiz() {
+  document.querySelectorAll('input').forEach(i => i.checked=false);
+  document.querySelectorAll('.feedback').forEach(fb => { fb.className='feedback'; fb.innerHTML=''; });
+  document.querySelectorAll('label.option').forEach(l => l.classList.remove('correct-highlight','wrong-highlight'));
+  document.getElementById('scoreBox').textContent = 'Scor: neverificat';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+renderQuiz();
+</script>
+</body>
+</html>

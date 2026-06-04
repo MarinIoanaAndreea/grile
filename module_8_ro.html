@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grile Cisco Modul 8 - Stratul de Rețea (Network Layer)</title>
+<style>
+  :root { --blue:#00a8d8; --green:#25a55b; --red:#d93025; --bg:#f4f7fb; --card:#fff; --text:#1f2937; --muted:#6b7280; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:Arial, Helvetica, sans-serif; background:var(--bg); color:var(--text); line-height:1.5; }
+  header { background:linear-gradient(135deg,#005f8f,#00a8d8); color:#fff; padding:32px 20px; text-align:center; }
+  header h1 { margin:0 0 8px; font-size:30px; }
+  header p { margin:0; opacity:.95; }
+  main { max-width:980px; margin:24px auto; padding:0 16px 40px; }
+  .toolbar { background:#fff; border-radius:14px; box-shadow:0 6px 18px rgba(0,0,0,.08); padding:16px; margin-bottom:18px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
+  .score { font-weight:700; }
+  .card { background:var(--card); border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,.08); padding:22px; margin:18px 0; }
+  .qhead { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px; }
+  .badge { display:inline-block; background:#e8f6fb; color:#006c92; padding:6px 10px; border-radius:999px; font-weight:700; font-size:14px; }
+  .topic { color:var(--muted); font-size:14px; }
+  h2 { font-size:20px; margin:12px 0 18px; }
+  .options { display:grid; gap:10px; margin-bottom:16px; }
+  .option { display:flex; align-items:flex-start; gap:10px; background:#f3f4f6; border:2px solid transparent; border-radius:10px; padding:13px 14px; cursor:pointer; transition:.15s; }
+  .option:hover { border-color:#b7e7f5; background:#eefcff; }
+  .option input { margin-top:4px; }
+  .correct { background:#e8f7ee !important; border-color:var(--green) !important; }
+  .incorrect { background:#fdeeee !important; border-color:var(--red) !important; }
+  button { border:0; background:var(--blue); color:#fff; border-radius:10px; padding:10px 15px; font-weight:700; cursor:pointer; margin-right:8px; }
+  button:hover { filter:brightness(.95); }
+  button.secondary { background:#64748b; }
+  .feedback { margin-top:12px; font-weight:700; display:none; }
+  .feedback.ok { color:var(--green); }
+  .feedback.bad { color:var(--red); }
+  .explanation { margin-top:12px; background:#f8fafc; border-left:5px solid var(--blue); border-radius:8px; padding:14px; display:none; color:#263238; }
+  .jump { display:flex; flex-wrap:wrap; gap:6px; }
+  .jump a { text-decoration:none; color:#006c92; background:#e8f6fb; padding:5px 9px; border-radius:8px; font-size:14px; font-weight:700; }
+  footer { text-align:center; color:var(--muted); padding:18px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Grile Cisco Modul 8 - Stratul de Rețea (Network Layer)</h1>
+  <p>Testează răspunsurile, verifică rezultatul și citește explicația aferentă fiecărei întrebări.</p>
+</header>
+<main>
+  <div class="toolbar">
+    <div class="score" id="score">Scor: 0 / 13</div>
+    <div>
+      <button onclick="checkAll()">Verifică tot</button>
+      <button class="secondary" onclick="resetAll()">Resetează tot</button>
+    </div>
+  </div>
+  <div class="jump"><a href="#q1">Q1</a><a href="#q2">Q2</a><a href="#q3">Q3</a><a href="#q4">Q4</a><a href="#q5">Q5</a><a href="#q6">Q6</a><a href="#q7">Q7</a><a href="#q8">Q8</a><a href="#q9">Q9</a><a href="#q10">Q10</a><a href="#q11">Q11</a><a href="#q12">Q12</a><a href="#q13">Q13</a></div>
+
+  <div id="q1"></div>
+  <section class="card" data-answer="netstat -r">
+    <div class="qhead"><span class="badge">Întrebarea 1</span><span class="topic">Cisco Modul 8</span></div>
+    <h2>Ce comandă poate fi folosită pe un host Windows pentru a afișa tabelul de rutare?</h2>
+    <div class="options">
+      <label class="option" id="q1_opt0"><input type="radio" name="q1" value="tracert"> <span>tracert</span></label>
+      <label class="option" id="q1_opt1"><input type="radio" name="q1" value="show ip route"> <span>show ip route</span></label>
+      <label class="option" id="q1_opt2"><input type="radio" name="q1" value="netstat -r"> <span>netstat -r</span></label>
+      <label class="option" id="q1_opt3"><input type="radio" name="q1" value="netstat -s"> <span>netstat -s</span></label>
+    </div>
+    <button onclick="checkAnswer(1)">Verifică răspunsul</button>
+    <button class="secondary" onclick="resetQuestion(1)">Resetează</button>
+    <div class="feedback" id="feedback1"></div>
+    <div class="explanation" id="explanation1"><strong>Explicație:</strong> Pe un host Windows, fie comanda route print, fie netstat -r pot fi folosite pentru a afișa tabelul de rutare al hostului. Comanda show ip route este folosită pe un router. Comanda netstat -s afișează statistici per protocol. Comanda tracert afișează calea unui pachet spre destinație.</div>
+  </section>
+
+  <div id="q2"></div>
+  <section class="card" data-answer="Adresă IP sursă și destinație">
+    <div class="qhead"><span class="badge">Întrebarea 2</span><span class="topic">Cisco Modul 8</span></div>
+    <h2>Ce informații sunt adăugate în timpul încapsulării la OSI Layer 3?</h2>
+    <div class="options">
+      <label class="option" id="q2_opt0"><input type="radio" name="q2" value="Protocol aplicație sursă și destinație"> <span>Protocol aplicație sursă și destinație</span></label>
+      <label class="option" id="q2_opt1"><input type="radio" name="q2" value="Adresă IP sursă și destinație"> <span>Adresă IP sursă și destinație</span></label>
+      <label class="option" id="q2_opt2"><input type="radio" name="q2" value="Număr de port sursă și destinație"> <span>Număr de port sursă și destinație</span></label>
+      <label class="option" id="q2_opt3"><input type="radio" name="q2" value="Adresă MAC sursă și destinație"> <span>Adresă MAC sursă și destinație</span></label>
+    </div>
+    <button onclick="checkAnswer(2)">Verifică răspunsul</button>
+    <button class="secondary" onclick="resetQuestion(2)">Resetează</button>
+    <div class="feedback" id="feedback2"></div>
+    <div class="explanation" id="explanation2"><strong>Explicație:</strong> IP este un protocol Layer 3. Dispozitivele Layer 3 pot deschide header-ul Layer 3 pentru a inspecta informațiile IP, inclusiv adresele IP sursă și destinație.</div>
+  </section>
+
+  <div id="q3"></div>
+  <section class="card" data-answer="MTU-ul este transmis nivelului rețea de nivelul legătură de date.">
+    <div class="qhead"><span class="badge">Întrebarea 3</span><span class="topic">Cisco Modul 8</span></div>
+    <h2>Cum folosește nivelul rețea valoarea MTU?</h2>
+    <div class="options">
+      <label class="option" id="q3_opt0"><input type="radio" name="q3" value="Nivelul rețea depinde de nivelurile superioare pentru a determina MTU."> <span>Nivelul rețea depinde de nivelurile superioare pentru a determina MTU.</span></label>
+      <label class="option" id="q3_opt1"><input type="radio" name="q3" value="Nivelul rețea depinde de nivelul legătură de date pentru a seta MTU și ajustează viteza de transmisie."> <span>Nivelul rețea depinde de nivelul legătură de date pentru a seta MTU și ajustează viteza de transmisie.</span></label>
+      <label class="option" id="q3_opt2"><input type="radio" name="q3" value="Pentru a crește viteza de livrare, nivelul rețea ignoră MTU."> <span>Pentru a crește viteza de livrare, nivelul rețea ignoră MTU.</span></label>
+      <label class="option" id="q3_opt3"><input type="radio" name="q3" value="MTU-ul este transmis nivelului rețea de nivelul legătură de date."> <span>MTU-ul este transmis nivelului rețea de nivelul legătură de date.</span></label>
+    </div>
+    <button onclick="checkAnswer(3)">Verifică răspunsul</button>
+    <button class="secondary" onclick="resetQuestion(3)">Resetează</button>
+    <div class="feedback" id="feedback3"></div>
+    <div class="explanation" id="explanation3"><strong>Explicație:</strong> Nivelul legătură de date indică nivelului rețea MTU-ul pentru mediul utilizat. Nivelul rețea folosește aceste informații pentru a determina cât de mare poate fi pachetul la transmitere. Când pachetele sunt primite pe un mediu și transmise pe un mediu cu MTU mai mic, dispozitivul de nivel rețea poate fragmenta pachetul.</div>
+  </section>
+
+  <div id="q4"></div>
+  <section class="card" data-answer="Header-ul IPv6 este mai simplu decât header-ul IPv4, ceea ce îmbunătățește procesarea pachetelor.">
+    <div class="qhead"><span class="badge">Întrebarea 4</span><span class="topic">Cisco Modul 8</span></div>
+    <h2>Care caracteristică descrie o îmbunătățire a IPv6 față de IPv4?</h2>
+    <div class="options">
+      <label class="option" id="q4_opt0"><input type="radio" name="q4" value="Header-ul IPv6 este mai simplu decât header-ul IPv4, ceea ce îmbunătățește procesarea pachetelor."> <span>Header-ul IPv6 este mai simplu decât header-ul IPv4, ceea ce îmbunătățește procesarea pachetelor.</span></label>
+      <label class="option" id="q4_opt1"><input type="radio" name="q4" value="Spațiul de adrese IPv6 este de patru ori mai mare decât cel IPv4."> <span>Spațiul de adrese IPv6 este de patru ori mai mare decât cel IPv4.</span></label>
+      <label class="option" id="q4_opt2"><input type="radio" name="q4" value="Adresele IPv6 se bazează pe adresare plată de 128 biți, spre deosebire de IPv4 care are adresare ierarhică de 32 biți."> <span>Adresele IPv6 se bazează pe adresare plată de 128 biți, spre deosebire de IPv4 care are adresare ierarhică de 32 biți.</span></label>
+      <label class="option" id="q4_opt3"><input type="radio" name="q4" value="Atât IPv4 cât și IPv6 suportă autentificarea, dar doar IPv6 suportă capabilități de confidențialitate."> <span>Atât IPv4 cât și IPv6 suportă autentificarea, dar doar IPv6 suportă capabilități de confidențialitate.</span></label>
+    </div>
+    <button onclick="checkAnswer(4)">Verifică răspunsul</button>
+    <button class="secondary" onclick="resetQuestion(4)">Resetează</button>
+    <div class="feedback" id="feedback4"></div>
+    <div class="explanation" id="explanation4"><strong>Explicație:</strong> Adresele IPv6 se bazează pe adresare ierarhică de 128 biți, iar header-ul IPv6 a fost simplificat cu mai puține câmpuri. IPv6 suportă nativ autentificarea și confidențialitatea. Spațiul de adrese IPv6 este de multe ori mai mare decât cel IPv4.</div>
+  </section>
+
+  <div id="q5"></div>
+  <section class="card" data-answer="IPv4 are un spațiu de adrese de 32 de biți.">
+    <div class="qhead"><span class="badge">Întrebarea 5</span><span class="topic">Cisco Modul 8</span></div>
+    <h2>Care afirmație descrie corect o caracteristică a IPv4?</h2>
+    <div class="options">
+      <label class="option" id="q5_opt0"><input type="radio" name="q5" value="Toate adresele IPv4 pot fi atribuite hosturilor."> <span>Toate adresele IPv4 pot fi atribuite hosturilor.</span></label>
+      <label class="option" id="q5_opt1"><input type="radio" name="q5" value="Un header IPv4 are mai puține câmpuri decât un header IPv6."> <span>Un header IPv4 are mai puține câmpuri decât un header IPv6.</span></label>
+      <label class="option" id="q5_opt2"><input type="radio" name="q5" value="IPv4 suportă nativ IPsec."> <span>IPv4 suportă nativ IPsec.</span></label>
+      <label class="option" id="q5_opt3"><input type="radio" name="q5" value="IPv4 are un spațiu de adrese de 32 de biți."> <span>IPv4 are un spațiu de adrese de 32 de biți.</span></label>
+    </div>
+    <button onclick="checkAnswer(5)">Verifică răspunsul</button>
+    <button class="secondary" onclick="resetQuestion(5)">Resetează</button>
+    <div class="feedback" id="feedback5"></div>
+    <div class="explanation" id="explanation5"><strong>Explicație:</strong> IPv4 are un spațiu de adrese de 32 de biți, oferind 4.294.967.296 adrese unice, dar doar 3,7 miliarde sunt atribuibile. IPv4 nu suportă nativ IPsec. IPv6 are un header simplificat cu mai puține câmpuri.</div>
+  </section>
+
+  <div id="q6"></div>
+  <section class="card" data-answer="Adresa IP destinație">
+    <div class="qhead"><span class="badge">Întrebarea 6</span><span class="topic">Cisco Modul 8</span></div>
+    <h2>Când un router primește un pachet, ce informații trebuie examinate pentru ca pachetul să fie transmis la o destinație la distanță?</h2>
+    <div class="options">
+      <label class="option" id="q6_opt0"><input type="radio" name="q6" value="Adresa MAC sursă"> <span>Adresa MAC sursă</span></label>
+      <label class="option" id="q6_opt1"><input type="radio" name="q6" value="Adresa IP sursă"> <span>Adresa IP sursă</span></label>
+      <label class="option" id="q6_opt2"><input type="radio" name="q6" value="Adresa MAC destinație"> <span>Adresa MAC destinație</span></label>
+      <label class="option" id="q6_opt3"><input type="radio" name="q6" value="Adresa IP destinație"> <span>Adresa IP destinație</span></label>
+    </div>
+    <button onclick="checkAnswer(6)">Verifică răspunsul</button>
+    <button class="secondary" onclick="resetQuestion(6)">Resetează</button>
+    <div class="feedback" id="feedback6"></div>
+    <div class="explanation" id="explanation6"><strong>Explicație:</strong> Când un router primește un pachet, examinează adresa destinație a pachetului și folosește tabelul de rutare pentru a căuta cea mai bună cale spre acea rețea.</div>
+  </section>
+
+  <div id="q7"></div>
+  <section class="card" data-answer="Pachetul va fi trimis direct la hostul destinație.">
+    <div class="qhead"><span class="badge">Întrebarea 7</span><span class="topic">Cisco Modul 8</span></div>
+    <h2>Un calculator trebuie să trimită un pachet unui host destinație din același LAN. Cum va fi trimis pachetul?</h2>
+    <div class="options">
+      <label class="option" id="q7_opt0"><input type="radio" name="q7" value="Pachetul va fi trimis mai întâi la gateway-ul implicit, apoi, în funcție de răspuns, poate fi trimis la hostul destinație."> <span>Pachetul va fi trimis mai întâi la gateway-ul implicit, apoi, în funcție de răspuns, poate fi trimis la hostul destinație.</span></label>
+      <label class="option" id="q7_opt1"><input type="radio" name="q7" value="Pachetul va fi trimis doar la gateway-ul implicit."> <span>Pachetul va fi trimis doar la gateway-ul implicit.</span></label>
+      <label class="option" id="q7_opt2"><input type="radio" name="q7" value="Pachetul va fi trimis mai întâi la gateway-ul implicit, apoi direct la hostul destinație."> <span>Pachetul va fi trimis mai întâi la gateway-ul implicit, apoi direct la hostul destinație.</span></label>
+      <label class="option" id="q7_opt3"><input type="radio" name="q7" value="Pachetul va fi trimis direct la hostul destinație."> <span>Pachetul va fi trimis direct la hostul destinație.</span></label>
+    </div>
+    <button onclick="checkAnswer(7)">Verifică răspunsul</button>
+    <button class="secondary" onclick="resetQuestion(7)">Resetează</button>
+    <div class="feedback" id="feedback7"></div>
+    <div class="explanation" id="explanation7"><strong>Explicație:</strong> Dacă hostul destinație se află în același LAN ca hostul sursă, nu este nevoie de gateway implicit. Gateway-ul implicit este necesar doar dacă pachetul trebuie trimis în afara LAN-ului.</div>
+  </section>
+
+  <div id="q8"></div>
+  <section class="card" data-answer="127.0.0.1">
+    <div class="qhead"><span class="badge">Întrebarea 8</span><span class="topic">Cisco Modul 8</span></div>
+    <h2>Ce adresă IPv4 poate folosi un host pentru a face ping la interfața loopback?</h2>
+    <div class="options">
+      <label class="option" id="q8_opt0"><input type="radio" name="q8" value="127.0.0.1"> <span>127.0.0.1</span></label>
+      <label class="option" id="q8_opt1"><input type="radio" name="q8" value="126.0.0.0"> <span>126.0.0.0</span></label>
+      <label class="option" id="q8_opt2"><input type="radio" name="q8" value="126.0.0.1"> <span>126.0.0.1</span></label>
+      <label class="option" id="q8_opt3"><input type="radio" name="q8" value="127.0.0.0"> <span>127.0.0.0</span></label>
+    </div>
+    <button onclick="checkAnswer(8)">Verifică răspunsul</button>
+    <button class="secondary" onclick="resetQuestion(8)">Resetează</button>
+    <div class="feedback" id="feedback8"></div>
+    <div class="explanation" id="explanation8"><strong>Explicație:</strong> Un host poate face ping la interfața loopback trimițând un pachet la o adresă IPv4 specială din rețeaua 127.0.0.0/8.</div>
+  </section>
+
+  <div id="q9"></div>
+  <section class="card" data-answer="Protocoalele orientate pe conexiune de la niveluri superioare urmăresc datele primite și pot solicita retransmiterea de la protocoalele hostului emițător.">
+    <div class="qhead"><span class="badge">Întrebarea 9</span><span class="topic">Cisco Modul 8</span></div>
+    <h2>Când un protocol fără conexiune este utilizat la un nivel inferior al modelului OSI, cum sunt detectate și retransmise datele lipsă?</h2>
+    <div class="options">
+      <label class="option" id="q9_opt0"><input type="radio" name="q9" value="Protocoalele IP de nivel rețea gestionează sesiunile dacă serviciile de transport orientate pe conexiune nu sunt disponibile."> <span>Protocoalele IP de nivel rețea gestionează sesiunile dacă serviciile de transport orientate pe conexiune nu sunt disponibile.</span></label>
+      <label class="option" id="q9_opt1"><input type="radio" name="q9" value="Protocoalele orientate pe conexiune de la niveluri superioare urmăresc datele primite și pot solicita retransmiterea de la protocoalele hostului emițător."> <span>Protocoalele orientate pe conexiune de la niveluri superioare urmăresc datele primite și pot solicita retransmiterea de la protocoalele hostului emițător.</span></label>
+      <label class="option" id="q9_opt2"><input type="radio" name="q9" value="Confirmările fără conexiune sunt folosite pentru a solicita retransmiterea."> <span>Confirmările fără conexiune sunt folosite pentru a solicita retransmiterea.</span></label>
+      <label class="option" id="q9_opt3"><input type="radio" name="q9" value="Procesul de livrare best-effort garantează că toate pachetele trimise sunt primite."> <span>Procesul de livrare best-effort garantează că toate pachetele trimise sunt primite.</span></label>
+    </div>
+    <button onclick="checkAnswer(9)">Verifică răspunsul</button>
+    <button class="secondary" onclick="resetQuestion(9)">Resetează</button>
+    <div class="feedback" id="feedback9"></div>
+    <div class="explanation" id="explanation9"><strong>Explicație:</strong> Când protocoalele fără conexiune sunt utilizate la niveluri inferioare, protocoalele de nivel superior pot trebui să colaboreze pe hosturile emițătoare și receptoare pentru a contabiliza și retransmite datele pierdute.</div>
+  </section>
+
+  <div id="q10"></div>
+  <section class="card" data-answer="Pentru a ameliora epuizarea adreselor IPv4">
+    <div class="qhead"><span class="badge">Întrebarea 10</span><span class="topic">Cisco Modul 8</span></div>
+    <h2>Care a fost motivul pentru crearea și implementarea IPv6?</h2>
+    <div class="options">
+      <label class="option" id="q10_opt0"><input type="radio" name="q10" value="Pentru a oferi mai mult spațiu de adrese în Registrul de Nume Internet"> <span>Pentru a oferi mai mult spațiu de adrese în Registrul de Nume Internet</span></label>
+      <label class="option" id="q10_opt1"><input type="radio" name="q10" value="Pentru a face mai ușoară citirea unei adrese de 32 de biți"> <span>Pentru a face mai ușoară citirea unei adrese de 32 de biți</span></label>
+      <label class="option" id="q10_opt2"><input type="radio" name="q10" value="Pentru a ameliora epuizarea adreselor IPv4"> <span>Pentru a ameliora epuizarea adreselor IPv4</span></label>
+      <label class="option" id="q10_opt3"><input type="radio" name="q10" value="Pentru a permite suportul NAT pentru adresarea privată"> <span>Pentru a permite suportul NAT pentru adresarea privată</span></label>
+    </div>
+    <button onclick="checkAnswer(10)">Verifică răspunsul</button>
+    <button class="secondary" onclick="resetQuestion(10)">Resetează</button>
+    <div class="feedback" id="feedback10"></div>
+    <div class="explanation" id="explanation10"><strong>Explicație:</strong> Spațiul de adresare IPv4 a fost epuizat de creșterea rapidă a Internetului. IPv6 extinde spațiul de adresare IP prin creșterea lungimii adresei de la 32 la 128 de biți.</div>
+  </section>
+
+  <div id="q11"></div>
+  <section class="card" data-answer="Adresa IP destinație">
+    <div class="qhead"><span class="badge">Întrebarea 11</span><span class="topic">Cisco Modul 8</span></div>
+    <h2>Ce informații folosesc routerele pentru a transmite un pachet de date spre destinația sa?</h2>
+    <div class="options">
+      <label class="option" id="q11_opt0"><input type="radio" name="q11" value="Adresa IP destinație"> <span>Adresa IP destinație</span></label>
+      <label class="option" id="q11_opt1"><input type="radio" name="q11" value="Adresa IP sursă"> <span>Adresa IP sursă</span></label>
+      <label class="option" id="q11_opt2"><input type="radio" name="q11" value="Adresa de legătură de date destinație"> <span>Adresa de legătură de date destinație</span></label>
+      <label class="option" id="q11_opt3"><input type="radio" name="q11" value="Adresa de legătură de date sursă"> <span>Adresa de legătură de date sursă</span></label>
+    </div>
+    <button onclick="checkAnswer(11)">Verifică răspunsul</button>
+    <button class="secondary" onclick="resetQuestion(11)">Resetează</button>
+    <div class="feedback" id="feedback11"></div>
+    <div class="explanation" id="explanation11"><strong>Explicație:</strong> Adresa IP destinație este adresa IP a dispozitivului receptor. Routerele folosesc această adresă IP pentru a transmite pachetul spre destinația sa.</div>
+  </section>
+
+  <div id="q12"></div>
+  <section class="card" data-answer="Adresa Destinație">
+    <div class="qhead"><span class="badge">Întrebarea 12</span><span class="topic">Cisco Modul 8</span></div>
+    <h2>Ce câmp din header-ul unui pachet IPv4 rămâne în general același pe toată durata transmisiei?</h2>
+    <div class="options">
+      <label class="option" id="q12_opt0"><input type="radio" name="q12" value="Time-to-Live (TTL)"> <span>Time-to-Live (TTL)</span></label>
+      <label class="option" id="q12_opt1"><input type="radio" name="q12" value="Adresa Destinație"> <span>Adresa Destinație</span></label>
+      <label class="option" id="q12_opt2"><input type="radio" name="q12" value="Flag"> <span>Flag</span></label>
+      <label class="option" id="q12_opt3"><input type="radio" name="q12" value="Lungimea Pachetului"> <span>Lungimea Pachetului</span></label>
+    </div>
+    <button onclick="checkAnswer(12)">Verifică răspunsul</button>
+    <button class="secondary" onclick="resetQuestion(12)">Resetează</button>
+    <div class="feedback" id="feedback12"></div>
+    <div class="explanation" id="explanation12"><strong>Explicație:</strong> Valoarea din câmpul Adresa Destinație dintr-un header IPv4 rămâne aceeași pe toată durata transmisiei. Celelalte câmpuri se pot schimba.</div>
+  </section>
+
+  <div id="q13"></div>
+  <section class="card" data-answer="Hop Limit">
+    <div class="qhead"><span class="badge">Întrebarea 13</span><span class="topic">Cisco Modul 8</span></div>
+    <h2>Ce câmp dintr-un pachet IPv6 este folosit de router pentru a determina dacă un pachet a expirat și trebuie aruncat?</h2>
+    <div class="options">
+      <label class="option" id="q13_opt0"><input type="radio" name="q13" value="Nicio rută spre destinație"> <span>Nicio rută spre destinație</span></label>
+      <label class="option" id="q13_opt1"><input type="radio" name="q13" value="Adresă inaccesibilă"> <span>Adresă inaccesibilă</span></label>
+      <label class="option" id="q13_opt2"><input type="radio" name="q13" value="Hop Limit"> <span>Hop Limit</span></label>
+      <label class="option" id="q13_opt3"><input type="radio" name="q13" value="Timp depășit (Time Exceeded)"> <span>Timp depășit (Time Exceeded)</span></label>
+    </div>
+    <button onclick="checkAnswer(13)">Verifică răspunsul</button>
+    <button class="secondary" onclick="resetQuestion(13)">Resetează</button>
+    <div class="feedback" id="feedback13"></div>
+    <div class="explanation" id="explanation13"><strong>Explicație:</strong> IPv6 nu are câmp TTL. În schimb, folosește câmpul Hop Limit pentru a determina dacă pachetul a expirat. Când Hop Limit ajunge la 0, routerul trimite un mesaj ICMPv6 Time Exceeded și aruncă pachetul.</div>
+  </section>
+</main>
+<footer>Fișier generat pentru exercițiu individual.</footer>
+<script>
+const total = 13;
+function getCard(qNum) { return document.querySelectorAll('.card')[qNum-1]; }
+function checkAnswer(qNum) {
+  const card = getCard(qNum);
+  const correct = card.dataset.answer;
+  const selected = card.querySelector(`input[name="q${qNum}"]:checked`);
+  const feedback = document.getElementById(`feedback${qNum}`);
+  const explanation = document.getElementById(`explanation${qNum}`);
+  card.querySelectorAll('.option').forEach(label => { label.classList.remove('correct','incorrect'); });
+  feedback.style.display = 'block';
+  explanation.style.display = 'block';
+  if (!selected) {
+    feedback.className = 'feedback bad';
+    feedback.textContent = 'Nu ai selectat niciun răspuns.';
+    updateScore(); return false;
+  }
+  const selectedLabel = selected.closest('.option');
+  const correctInput = Array.from(card.querySelectorAll('input')).find(input => input.value === correct);
+  if (selected.value === correct) {
+    selectedLabel.classList.add('correct');
+    feedback.className = 'feedback ok';
+    feedback.textContent = 'Corect!';
+  } else {
+    selectedLabel.classList.add('incorrect');
+    if (correctInput) correctInput.closest('.option').classList.add('correct');
+    feedback.className = 'feedback bad';
+    feedback.textContent = 'Greșit. Răspunsul corect este: ' + correct;
+  }
+  updateScore();
+  return selected.value === correct;
+}
+function resetQuestion(qNum) {
+  const card = getCard(qNum);
+  card.querySelectorAll('input').forEach(input => input.checked = false);
+  card.querySelectorAll('.option').forEach(label => label.classList.remove('correct','incorrect'));
+  document.getElementById(`feedback${qNum}`).style.display = 'none';
+  document.getElementById(`explanation${qNum}`).style.display = 'none';
+  updateScore();
+}
+function checkAll() { for (let i=1; i<=total; i++) checkAnswer(i); updateScore(); window.scrollTo({top:0, behavior:'smooth'}); }
+function resetAll() { for (let i=1; i<=total; i++) resetQuestion(i); updateScore(); window.scrollTo({top:0, behavior:'smooth'}); }
+function updateScore() {
+  let score = 0;
+  for (let i=1; i<=total; i++) {
+    const card = getCard(i);
+    const selected = card.querySelector(`input[name="q${i}"]:checked`);
+    if (selected && selected.value === card.dataset.answer && document.getElementById(`feedback${i}`).style.display === 'block') score++;
+  }
+  document.getElementById('score').textContent = `Scor: ${score} / ${total}`;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grile Cisco Modul 6 - Stratul Legătură de Date (Data Link Layer)</title>
+<style>
+:root { --blue:#00a9ce; --green:#2e7d32; --red:#c62828; --bg:#f4f7fb; --card:#fff; --muted:#5d6b7a; }
+*{box-sizing:border-box} body{font-family:Arial, Helvetica, sans-serif; margin:0; background:var(--bg); color:#18212b;}
+header{background:linear-gradient(135deg,#0a4d68,#088395); color:#fff; padding:28px 20px; text-align:center;}
+header h1{margin:0 0 8px; font-size:30px;} header p{margin:0; opacity:.95;}
+.container{max-width:980px; margin:24px auto; padding:0 16px 40px;}
+.info{background:#e8f5ff; border-left:5px solid #088395; padding:14px 16px; border-radius:10px; margin-bottom:18px;}
+.question{background:var(--card); border-radius:14px; padding:20px; margin:18px 0; box-shadow:0 5px 18px rgba(0,0,0,.08);}
+.question h2{font-size:18px; margin:0 0 8px; color:#0a4d68;} .hint{font-size:13px; color:var(--muted); margin-bottom:12px;}
+.option{display:flex; align-items:flex-start; gap:10px; border:1px solid #d9e3ea; background:#fafafa; padding:12px; border-radius:10px; margin:10px 0; cursor:pointer;}
+.option:hover{border-color:#088395; background:#f0fbff;} .option input{margin-top:2px; transform:scale(1.15);}
+.buttons{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;} button{border:0; border-radius:9px; padding:10px 14px; font-weight:700; cursor:pointer;}
+.check{background:#088395; color:#fff;} .resetOne{background:#e7eef4; color:#223;} .checkAll{background:#2e7d32; color:#fff; font-size:16px;} .resetAll{background:#455a64; color:#fff; font-size:16px;}
+.feedback{display:none; margin-top:14px; padding:13px 14px; border-radius:10px; line-height:1.5;} .ok{display:block; background:#e8f5e9; border-left:5px solid var(--green);} .bad{display:block; background:#ffebee; border-left:5px solid var(--red);} .warn{display:block; background:#fff8e1; border-left:5px solid #f9a825;}
+.correctAnswer{font-weight:700; margin-top:6px;} .explanation{margin-top:8px; color:#263238;} .score{background:#fff; border-radius:14px; padding:18px; box-shadow:0 5px 18px rgba(0,0,0,.08); position:sticky; top:10px; z-index:1; margin-bottom:18px;}
+.badge{display:inline-block; padding:5px 9px; border-radius:999px; background:#eef7f9; color:#0a4d68; font-weight:700; margin-left:6px;}
+footer{text-align:center; color:#667; font-size:13px; padding:20px;}
+</style>
+</head>
+<body>
+<header>
+<h1>Grile Cisco Modul 6 - Stratul Legătură de Date (Data Link Layer)</h1>
+<p>Fișier interactiv cu verificare automată, răspunsuri corecte și explicații.</p>
+</header>
+<div class="container">
+<div class="score">
+<strong>Progres:</strong> <span id="scoreText">Nu ai verificat încă răspunsurile.</span>
+<div class="buttons"><button class="checkAll" onclick="checkAll()">Verifică toate răspunsurile</button><button class="resetAll" onclick="resetAll()">Resetează testul</button></div>
+</div>
+<div class="info">Pentru întrebările cu alegere multiplă, trebuie bifate exact variantele indicate. După verificare, apare explicația aferentă întrebării.</div>
+<div id="quiz"></div>
+</div>
+<footer>Generat pe baza informațiilor din Cisco Modul 6.</footer>
+<script>
+const questions = [
+  {
+    q: "Ce identificator este folosit la nivelul legătură de date (data link layer) pentru a identifica în mod unic un dispozitiv Ethernet?",
+    multi: false,
+    options: ["Număr de port TCP", "Număr de secvență", "Adresă IP", "Număr de port UDP", "Adresă MAC"],
+    correct: [4],
+    explanation: "Cadrele Ethernet sunt identificate la nivelul legătură de date prin adresele MAC, care sunt unice pentru fiecare placă de rețea (NIC). Adresele IP sunt folosite la nivelul rețea, iar porturile TCP/UDP la nivelul transport."
+  },
+  {
+    q: "Ce atribut al unei plăci de rețea (NIC) o plasează la nivelul legătură de date al modelului OSI?",
+    multi: false,
+    options: ["Portul RJ-45", "Cablul Ethernet conectat", "Adresa MAC", "Stiva de protocoale TCP/IP", "Adresa IP"],
+    correct: [2],
+    explanation: "Nivelul legătură de date descrie accesul la mediu și adresarea fizică. Codificarea adresei MAC pe un NIC îl plasează la acest nivel. Porturile și cablurile sunt la nivelul fizic, adresele IP la nivelul rețea."
+  },
+  {
+    q: "Care două organizații de inginerie definesc standarde deschise și protocoale care se aplică nivelului legătură de date? (Alege două.)",
+    multi: true,
+    options: ["Electronic Industries Alliance (EIA)", "International Telecommunication Union (ITU)", "Internet Society (ISOC)", "Internet Assigned Numbers Authority (IANA)", "Institute of Electrical and Electronics Engineers (IEEE)"],
+    correct: [1, 4],
+    explanation: "IANA administrează alocarea adreselor IP. EIA este o alianță comercială pentru organizații electronice, cunoscută pentru standarde de cablare. IEEE definește standarde deschise pentru nivelul de acces la rețea."
+  },
+  {
+    q: "Ce este adevărat privind topologiile fizice și logice?",
+    multi: false,
+    options: ["Topologia logică este întotdeauna aceeași cu cea fizică.", "Topologiile fizice se referă la modul în care o rețea transferă cadre.", "Topologia logică este întotdeauna aceeași cu cea fizică.", "Topologiile fizice afișează schema de adresare IP a fiecărei rețele.", "Topologiile logice se referă la modul în care o rețea transferă date între dispozitive."],
+    correct: [4],
+    explanation: "Topologiile fizice arată interconexiunile fizice ale dispozitivelor. Topologiile logice arată modul în care rețeaua va transfera date între nodurile conectate."
+  },
+  {
+    q: "Ce metodă este folosită pentru a gestiona accesul la mediu în rețelele wireless cu competiție (contention-based)?",
+    multi: false,
+    options: ["Token passing", "Ordonare prin prioritate", "CSMA/CA", "CSMA/CD"],
+    correct: [2],
+    explanation: "CSMA/CA (Carrier Sense Multiple Access with Collision Avoidance) este folosit în tehnologia wireless pentru a media competiția la mediu. CSMA/CD este folosit în rețelele Ethernet cu cablu."
+  },
+  {
+    q: "Un tehnician trebuie să proiecteze o topologie de rețea fizică cu un nivel ridicat de redundanță. Ce topologie fizică necesită ca fiecare nod să fie conectat la toate celelalte noduri?",
+    multi: false,
+    options: ["Ierarhică", "Stea (Star)", "Bus", "Plasă (Mesh)", "Inel (Ring)"],
+    correct: [3],
+    explanation: "Topologia plasă (mesh) oferă disponibilitate ridicată deoarece fiecare nod este conectat la toate celelalte noduri. Topologiile mesh se găsesc în rețelele WAN. Poate fi folosită și o topologie parțial mesh."
+  },
+  {
+    q: "Care afirmație descrie modul de transmisie half-duplex?",
+    multi: false,
+    options: ["Datele transmise circulă simultan în mai multe direcții.", "Datele transmise pot circula doar într-o singură direcție.", "Datele transmise circulă în ambele direcții simultan.", "Datele transmise circulă într-o singură direcție la un moment dat."],
+    correct: [3],
+    explanation: "Transmisia datelor poate funcționa în trei moduri: Simplex - doar o direcție. Half-duplex - o direcție la un moment dat. Full-duplex - ambele direcții simultan."
+  },
+  {
+    q: "Care este o funcție a subsublayer-ului LLC (Logical Link Control)?",
+    multi: false,
+    options: ["Definirea proceselor de acces la mediu efectuate de hardware", "Furnizarea adresării la nivelul legătură de date", "Identificarea protocolului de nivel rețea utilizat", "Acceptarea segmentelor și împachetarea lor în pachete"],
+    correct: [2],
+    explanation: "Definirea proceselor de acces la mediu și furnizarea adresării la nivelul legătură de date sunt funcții ale subsublayer-ului MAC. Nivelul legătură de date acceptă pachete Layer 3 și le împachetează în cadre."
+  },
+  {
+    q: "Ce metodă de control al accesului la mediu folosesc rețelele Ethernet cu hub-uri tradiționale?",
+    multi: false,
+    options: ["CSMA/CD", "Token passing", "Trecere la rând", "Determinism"],
+    correct: [0],
+    explanation: "CSMA/CD este folosit de rețelele Ethernet cu hub-uri tradiționale. CSMA/CA este folosit de rețelele wireless bazate pe 802.11."
+  },
+  {
+    q: "Care sunt cele două subsublayer-uri ale nivelului legătură de date al modelului OSI? (Alege două.)",
+    multi: true,
+    options: ["Fizic", "Acces la rețea", "LLC", "Internet", "MAC", "Transport"],
+    correct: [2, 4],
+    explanation: "Nivelul legătură de date al modelului OSI este împărțit în două subsublayer-uri: MAC (Media Access Control) și LLC (Logical Link Control)."
+  },
+  {
+    q: "Ce strat al modelului OSI este responsabil cu specificarea metodei de încapsulare folosite pentru tipuri specifice de medii?",
+    multi: false,
+    options: ["Fizic", "Transport", "Legătură de date (Data link)", "Aplicație"],
+    correct: [2],
+    explanation: "Încapsularea este o funcție a nivelului legătură de date. Diferite tipuri de medii necesită diferite tipuri de încapsulare la nivelul legătură de date."
+  },
+  {
+    q: "Ce tip de topologie fizică poate fi creată prin conectarea tuturor cablurilor Ethernet la un dispozitiv central?",
+    multi: false,
+    options: ["Bus", "Inel (Ring)", "Stea (Star)", "Plasă (Mesh)"],
+    correct: [2],
+    explanation: "Dispozitivele conectate la topologia stea Ethernet se conectează fie la un hub, fie la un switch."
+  },
+  {
+    q: "Care sunt două servicii efectuate de nivelul legătură de date al modelului OSI? (Alege două.)",
+    multi: true,
+    options: ["Fragmentează pachetele de date la dimensiunea MTU.", "Determină calea pentru a transmite pachetele.", "Acceptă pachete Layer 3 și le încapsulează în cadre.", "Oferă control acces la mediu și efectuează detecția erorilor.", "Monitorizează comunicarea Layer 2 prin construirea unui tabel de adrese MAC."],
+    correct: [2, 3],
+    explanation: "Nivelul legătură de date acceptă pachete Layer 3 și le încapsulează în cadre, și oferă control al accesului la mediu și detecție a erorilor. Determinarea căii este un serviciu de Layer 3."
+  },
+  {
+    q: "Deși CSMA/CD este încă o caracteristică a Ethernet-ului, de ce nu mai este necesar?",
+    multi: false,
+    options: ["Disponibilitatea aproape nelimitată a adreselor IPv6", "Utilizarea CSMA/CA", "Utilizarea switch-urilor Layer 2 cu capacitate full-duplex", "Dezvoltarea operației half-duplex a switch-urilor", "Utilizarea vitezelor Gigabit Ethernet"],
+    correct: [2],
+    explanation: "Utilizarea switch-urilor Layer 2 în modul full-duplex elimină coliziunile, eliminând astfel nevoia de CSMA/CD."
+  }
+];
+
+function esc(s){return s.replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+function render(){
+  const quiz=document.getElementById('quiz'); quiz.innerHTML='';
+  questions.forEach((q,i)=>{
+    const type=q.multi?'checkbox':'radio';
+    const note=q.multi?'Alege toate variantele corecte.':'Alege o singură variantă.';
+    const opts=q.options.map((op,j)=>`<label class="option"><input type="${type}" name="q${i}" value="${j}"><span>${esc(op)}</span></label>`).join('');
+    quiz.innerHTML += `<section class="question" id="qbox${i}"><h2>Întrebarea ${i+1} <span class="badge">${q.multi?'răspuns multiplu':'răspuns unic'}</span></h2><p>${esc(q.q)}</p><div class="hint">${note}</div>${opts}<div class="buttons"><button class="check" onclick="checkQuestion(${i})">Verifică întrebarea</button><button class="resetOne" onclick="resetQuestion(${i})">Resetează</button></div><div class="feedback" id="fb${i}"></div></section>`;
+  });
+}
+function selected(i){return Array.from(document.querySelectorAll(`input[name="q${i}"]:checked`)).map(x=>Number(x.value)).sort((a,b)=>a-b);}
+function same(a,b){return a.length===b.length && a.every((v,i)=>v===b[i]);}
+function answerText(q){return q.correct.map(idx=>q.options[idx]).join('; ')}
+function checkQuestion(i){
+  const q=questions[i], sel=selected(i), fb=document.getElementById('fb'+i); fb.className='feedback';
+  if(sel.length===0){fb.classList.add('warn'); fb.innerHTML='<strong>Nu ai selectat niciun răspuns.</strong>'; return false;}
+  const good=same(sel,[...q.correct].sort((a,b)=>a-b)); fb.classList.add(good?'ok':'bad');
+  fb.innerHTML = `<strong>${good?'Corect!':'Greșit.'}</strong><div class="correctAnswer">Răspuns corect: ${esc(answerText(q))}</div><div class="explanation"><strong>Explicație:</strong> ${esc(q.explanation)}</div>`;
+  return good;
+}
+function resetQuestion(i){document.querySelectorAll(`input[name="q${i}"]`).forEach(x=>x.checked=false); const fb=document.getElementById('fb'+i); fb.className='feedback'; fb.innerHTML=''; updateScoreText(null);}
+function checkAll(){let score=0; questions.forEach((_,i)=>{if(checkQuestion(i)) score++;}); updateScoreText(score); window.scrollTo({top:0, behavior:'smooth'});}
+function resetAll(){questions.forEach((_,i)=>resetQuestion(i)); updateScoreText(null);}
+function updateScoreText(score){document.getElementById('scoreText').textContent = score===null ? 'Nu ai verificat încă răspunsurile.' : `Ai răspuns corect la ${score} din ${questions.length} întrebări.`;}
+render();
+</script>
+</body>
+</html>

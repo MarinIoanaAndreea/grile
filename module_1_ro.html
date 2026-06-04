@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Grile interactive - Modul 1 - Rețele</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 24px; color: #1f2937; }
+  .container { max-width: 980px; margin: auto; }
+  h1 { text-align: center; margin-bottom: 6px; }
+  .subtitle { text-align: center; color: #64748b; margin-bottom: 28px; }
+  .question { background: white; border-radius: 14px; padding: 20px 22px; margin-bottom: 18px; box-shadow: 0 2px 8px rgba(0,0,0,.08); border-left: 6px solid #94a3b8; }
+  .question.correct { border-left-color: #16a34a; }
+  .question.incorrect { border-left-color: #dc2626; }
+  .q-title { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+  .q-text { margin: 0 0 14px 0; line-height: 1.45; }
+  label { display: block; padding: 10px 12px; margin: 7px 0; border-radius: 8px; background: #f1f5f9; cursor: pointer; }
+  label:hover { background: #e2e8f0; }
+  .feedback { margin-top: 12px; font-weight: 700; display: none; }
+  .explanation { margin-top: 8px; padding: 10px 12px; background: #f8fafc; border-radius: 8px; display: none; color: #334155; line-height: 1.45; }
+  .actions { position: sticky; bottom: 0; background: rgba(244,246,248,.95); padding: 14px 0; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  button { border: none; border-radius: 10px; padding: 12px 18px; font-size: 15px; cursor: pointer; font-weight: 700; }
+  .check { background: #2563eb; color: white; }
+  .reset { background: #e2e8f0; color: #0f172a; }
+  .score { text-align: center; font-size: 20px; font-weight: 800; margin: 20px 0; }
+  .correct-answer { outline: 2px solid #16a34a; background: #dcfce7; }
+  .wrong-answer { outline: 2px solid #dc2626; background: #fee2e2; }
+  .note { font-size: 13px; color: #64748b; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Grile interactive - Modul 1 - Rețele</h1>
+  <div class="subtitle">Bifează răspunsul/răspunsurile, apoi apasă „Verifică răspunsurile". La întrebările cu alegere multiplă, trebuie bifate exact variantele indicate.</div>
+
+  <form id="quizForm"></form>
+
+  <div class="actions">
+    <button type="button" class="check" onclick="checkAnswers()">Verifică răspunsurile</button>
+    <button type="button" class="reset" onclick="resetQuiz()">Resetează</button>
+  </div>
+  <div id="score" class="score"></div>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "În timpul unei inspecții de rutină, un tehnician a descoperit că un software instalat pe un calculator colecta în secret date despre site-urile web vizitate de utilizatori. Ce tip de amenințare afectează acest calculator?",
+    type: "radio",
+    answers: ["Atac DoS (Denial of Service)", "Furt de identitate", "Spyware", "Atac zero-day"],
+    correct: [2],
+    hint: "Spyware-ul este un software instalat pe un dispozitiv care colectează informații despre utilizatori sau activitatea acestora."
+  },
+  {
+    q: "Care termen se referă la o rețea care oferă acces securizat la birourile corporative pentru furnizori, clienți și colaboratori?",
+    type: "radio",
+    answers: ["Internet", "Intranet", "Extranet", "Extendednet"],
+    correct: [2],
+    hint: "Extranet-ul oferă acces securizat furnizorilor, clienților și colaboratorilor."
+  },
+  {
+    q: "O corporație mare și-a modificat rețeaua pentru a permite utilizatorilor să acceseze resursele de rețea de pe laptopurile și telefoanele personale. Ce tendință de rețea descrie aceasta?",
+    type: "radio",
+    answers: ["Cloud computing", "Colaborare online", "BYOD (Bring Your Own Device - Aduce-ți propriul dispozitiv)", "Videoconferință"],
+    correct: [2],
+    hint: "BYOD permite utilizatorilor finali să folosească dispozitive personale pentru a accesa rețeaua corporativă."
+  },
+  {
+    q: "Ce este un ISP (Internet Service Provider)?",
+    type: "radio",
+    answers: [
+      "Este un organism de standardizare care dezvoltă standarde de cablare pentru rețele.",
+      "Este un protocol care stabilește modul în care calculatoarele dintr-o rețea locală comunică.",
+      "Este o organizație care permite persoanelor fizice și companiilor să se conecteze la Internet.",
+      "Este un dispozitiv de rețea care combină funcționalitatea mai multor dispozitive de rețea într-unul singur."
+    ],
+    correct: [2],
+    hint: "Un ISP (Internet Service Provider - Furnizor de Servicii Internet) oferă acces la Internet pentru companii și persoane fizice."
+  },
+  {
+    q: "În ce scenariu ar fi recomandat utilizarea unui WISP (Wireless Internet Service Provider)?",
+    type: "radio",
+    answers: [
+      "Un internet cafe dintr-un oraș",
+      "O fermă dintr-o zonă rurală fără acces la internet prin cablu",
+      "Orice locuință cu mai multe dispozitive wireless",
+      "Un apartament dintr-o clădire cu acces la internet prin cablu"
+    ],
+    correct: [1],
+    hint: "WISP-urile sunt folosite în general în zonele rurale unde accesul DSL sau prin cablu nu este disponibil."
+  },
+  {
+    q: "Ce caracteristică a unei rețele îi permite să crească rapid pentru a susține utilizatori și aplicații noi, fără a afecta performanța serviciilor oferite utilizatorilor existenți?",
+    type: "radio",
+    answers: ["Fiabilitate", "Scalabilitate", "Calitatea serviciului (QoS)", "Accesibilitate"],
+    correct: [1],
+    hint: "Capacitatea unei rețele de a crește fără a afecta utilizatorii și serviciile existente se numește scalabilitate."
+  },
+  {
+    q: "O universitate construiește un nou cămin pe campus. Un muncitor deteriorează accidental un cablu de fibră optică ce conectează două cămine la centrul de date. Deși cablul a fost tăiat, studenții experimentează doar o întrerupere foarte scurtă a serviciilor de rețea. Ce caracteristică a rețelei este demonstrată?",
+    type: "radio",
+    answers: ["Calitatea serviciului (QoS)", "Scalabilitate", "Securitate", "Toleranță la defecțiuni (Fault tolerance)", "Integritate"],
+    correct: [3],
+    hint: "Toleranța la defecțiuni (Fault tolerance) permite unei rețele să răspundă rapid la defecțiunile dispozitivelor, mediilor sau serviciilor."
+  },
+  {
+    q: "Care sunt două caracteristici ale unei rețele scalabile? (Alege două.)",
+    type: "checkbox",
+    answers: [
+      "Se supraîncarcă ușor cu trafic crescut",
+      "Crește în dimensiune fără a afecta utilizatorii existenți",
+      "Nu este la fel de fiabilă ca o rețea mică",
+      "Potrivită pentru dispozitive modulare care permit extinderea",
+      "Oferă un număr limitat de aplicații"
+    ],
+    correct: [1, 3],
+    hint: "O rețea scalabilă poate crește fără înlocuirea majoră a dispozitivelor existente. Dispozitivele modulare ajută la extindere."
+  },
+  {
+    q: "Ce dispozitiv îndeplinește funcția de determinare a căii pe care mesajele trebuie să o urmeze prin internetwork-uri?",
+    type: "radio",
+    answers: ["Un router", "Un firewall", "Un server web", "Un modem DSL"],
+    correct: [0],
+    hint: "Un router determină calea pe care mesajele trebuie să o urmeze prin rețea."
+  },
+  {
+    q: "Care două opțiuni de conectare la Internet nu necesită instalarea de cabluri fizice în clădire? (Alege două.)",
+    type: "checkbox",
+    answers: ["DSL", "Celular (rețea mobilă)", "Satelit", "Dial-up", "Linie dedicată închiriată"],
+    correct: [1, 2],
+    hint: "Rețeaua celulară folosește rețeaua mobilă, iar satelitul este adesea utilizat unde cablarea fizică nu este disponibilă."
+  },
+  {
+    q: "Ce tip de rețea trebuie să acceseze un utilizator de acasă pentru a face cumpărături online?",
+    type: "radio",
+    answers: ["Un intranet", "Internetul", "Un extranet", "O rețea locală (LAN)"],
+    correct: [1],
+    hint: "Vânzătorii online sunt accesați prin Internet."
+  },
+  {
+    q: "Cum schimbă BYOD (Bring Your Own Device) modul în care companiile implementează rețelele?",
+    type: "radio",
+    answers: [
+      "BYOD obligă organizațiile să achiziționeze laptopuri în loc de calculatoare desktop.",
+      "Utilizatorii BYOD sunt responsabili pentru propria securitate de rețea, reducând astfel nevoia de politici de securitate organizaționale.",
+      "Dispozitivele BYOD sunt mai scumpe decât dispozitivele achiziționate de organizație.",
+      "BYOD oferă flexibilitate în privința locului și modului în care utilizatorii accesează resursele de rețea."
+    ],
+    correct: [3],
+    hint: "BYOD oferă flexibilitate în metodele de acces, locații și dispozitive personale, dar securitatea rămâne importantă."
+  },
+  {
+    q: "Un angajat dorește să acceseze rețeaua organizației de la distanță, în cel mai sigur mod posibil. Ce funcție de rețea ar permite unui angajat să obțină acces remote securizat la rețeaua companiei?",
+    type: "radio",
+    answers: ["ACL (Listă de control acces)", "IPS (Sistem de prevenire a intruziunilor)", "VPN (Rețea Privată Virtuală)", "BYOD"],
+    correct: [2],
+    hint: "Rețelele private virtuale (VPN) sunt folosite pentru a oferi acces securizat lucrătorilor de la distanță."
+  },
+  {
+    q: "Ce este Internetul?",
+    type: "radio",
+    answers: [
+      "Este o rețea bazată pe tehnologia Ethernet.",
+      "Oferă acces la rețea pentru dispozitive mobile.",
+      "Oferă conexiuni prin rețele globale interconectate.",
+      "Este o rețea privată pentru o organizație cu conexiuni LAN și WAN."
+    ],
+    correct: [2],
+    hint: "Internetul oferă conexiuni globale prin rețele interconectate folosind diferite tehnologii."
+  },
+  {
+    q: "Care sunt două funcții ale dispozitivelor finale (end devices) într-o rețea? (Alege două.)",
+    type: "checkbox",
+    answers: [
+      "Inițiază datele care circulă prin rețea.",
+      "Direcționează datele pe căi alternative în cazul defecțiunii legăturilor.",
+      "Filtrează fluxul de date pentru a îmbunătăți securitatea.",
+      "Reprezintă interfața dintre oameni și rețeaua de comunicații.",
+      "Furnizează canalul prin care circulă mesajele de rețea."
+    ],
+    correct: [0, 3],
+    hint: "Dispozitivele finale inițiază datele și reprezintă interfața dintre oameni și rețeaua de comunicații."
+  }
+];
+
+function renderQuiz() {
+  const form = document.getElementById('quizForm');
+  form.innerHTML = '';
+  questions.forEach((item, qi) => {
+    const div = document.createElement('div');
+    div.className = 'question';
+    div.id = `q${qi}`;
+    div.innerHTML = `<div class="q-title">Întrebarea ${qi + 1}</div><p class="q-text">${item.q}</p>`;
+    if (item.type === 'checkbox') {
+      const note = document.createElement('div');
+      note.className = 'note';
+      note.textContent = 'Alege două variante.';
+      div.appendChild(note);
+    }
+    item.answers.forEach((ans, ai) => {
+      const id = `q${qi}_a${ai}`;
+      const label = document.createElement('label');
+      label.setAttribute('for', id);
+      label.innerHTML = `<input type="${item.type}" id="${id}" name="q${qi}" value="${ai}"> ${ans}`;
+      div.appendChild(label);
+    });
+    const feedback = document.createElement('div');
+    feedback.className = 'feedback';
+    div.appendChild(feedback);
+    const explanation = document.createElement('div');
+    explanation.className = 'explanation';
+    explanation.textContent = item.hint;
+    div.appendChild(explanation);
+    form.appendChild(div);
+  });
+}
+
+function arraysEqual(a, b) {
+  return a.length === b.length && a.every((v, i) => v === b[i]);
+}
+
+function checkAnswers() {
+  let score = 0;
+  questions.forEach((item, qi) => {
+    const qDiv = document.getElementById(`q${qi}`);
+    qDiv.classList.remove('correct', 'incorrect');
+    qDiv.querySelectorAll('label').forEach(label => label.classList.remove('correct-answer', 'wrong-answer'));
+    const selected = [...qDiv.querySelectorAll('input:checked')].map(input => Number(input.value)).sort((a,b)=>a-b);
+    const correct = [...item.correct].sort((a,b)=>a-b);
+    const isCorrect = arraysEqual(selected, correct);
+    if (isCorrect) score++;
+    qDiv.classList.add(isCorrect ? 'correct' : 'incorrect');
+    qDiv.querySelector('.feedback').style.display = 'block';
+    qDiv.querySelector('.feedback').textContent = isCorrect ? 'Corect!' : 'Greșit.';
+    qDiv.querySelector('.feedback').style.color = isCorrect ? '#16a34a' : '#dc2626';
+    qDiv.querySelector('.explanation').style.display = 'block';
+    qDiv.querySelectorAll('label').forEach((label, ai) => {
+      if (correct.includes(ai)) label.classList.add('correct-answer');
+      if (selected.includes(ai) && !correct.includes(ai)) label.classList.add('wrong-answer');
+    });
+  });
+  document.getElementById('score').textContent = `Scor: ${score} / ${questions.length}`;
+  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+}
+
+function resetQuiz() {
+  document.getElementById('quizForm').reset();
+  document.getElementById('score').textContent = '';
+  document.querySelectorAll('.question').forEach(div => {
+    div.classList.remove('correct', 'incorrect');
+    div.querySelector('.feedback').style.display = 'none';
+    div.querySelector('.explanation').style.display = 'none';
+    div.querySelectorAll('label').forEach(label => label.classList.remove('correct-answer', 'wrong-answer'));
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+renderQuiz();
+</script>
+</body>
+</html>

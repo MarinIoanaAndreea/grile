@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grile Cisco 13.3.4 - ICMP</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #0ea5e9;
+      --accent-dark: #0284c7;
+      --ok: #16a34a;
+      --bad: #dc2626;
+      --border: #dbe3ef;
+      --soft: #eef6ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #eef6ff 0%, var(--bg) 240px);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    header {
+      max-width: 1050px;
+      margin: 0 auto;
+      padding: 34px 18px 18px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(26px, 4vw, 40px);
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin: 0;
+      max-width: 780px;
+    }
+
+    main {
+      max-width: 1050px;
+      margin: 0 auto;
+      padding: 12px 18px 50px;
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(244, 247, 251, 0.92);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      margin: 0 0 18px;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .toolbar .score {
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 11px 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .08s ease, background .2s ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+
+    .primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .primary:hover { background: var(--accent-dark); }
+
+    .secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .quiz-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px;
+      margin: 18px 0;
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+    }
+
+    .q-head {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 42px;
+      height: 32px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--accent-dark);
+      font-weight: 800;
+    }
+
+    .multi-note {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 6px;
+    }
+
+    .question {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 8px 0 14px;
+    }
+
+    .options {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    label.option {
+      display: grid;
+      grid-template-columns: 26px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 13px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    label.option:hover { background: #f8fafc; }
+    input { margin-top: 4px; transform: scale(1.15); }
+
+    .feedback {
+      display: none;
+      margin-top: 15px;
+      padding: 13px 14px;
+      border-radius: 12px;
+      font-weight: 700;
+    }
+
+    .feedback.ok {
+      display: block;
+      background: #dcfce7;
+      color: #14532d;
+      border: 1px solid #86efac;
+    }
+
+    .feedback.bad {
+      display: block;
+      background: #fee2e2;
+      color: #7f1d1d;
+      border: 1px solid #fca5a5;
+    }
+
+    .correct-answer {
+      margin-top: 8px;
+      font-weight: 400;
+    }
+
+    .correct-highlight {
+      border-color: #86efac !important;
+      background: #f0fdf4 !important;
+    }
+
+    .wrong-highlight {
+      border-color: #fca5a5 !important;
+      background: #fff1f2 !important;
+    }
+
+    footer {
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+      padding: 12px 0 34px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Grile Cisco - 13.3.4 Module Quiz</h1>
+    <p class="subtitle">ICMP — Quiz interactiv cu 14 întrebări. Bifează răspunsul/răspunsurile, apoi apasă „Verifică răspunsurile".</p>
+  </header>
+
+  <main>
+    <section class="toolbar">
+      <div class="score" id="scoreBox">Scor: neverificat</div>
+      <div>
+        <button class="primary" onclick="checkQuiz()">Verifică răspunsurile</button>
+        <button class="secondary" onclick="resetQuiz()">Resetează</button>
+      </div>
+    </section>
+
+    <form id="quizForm"></form>
+  </main>
+
+  <footer>
+    Fișier HTML generat pentru exersare individuală.
+  </footer>
+
+  <script>
+    const questions = [
+      {
+        text: "Un tehnician depanează o rețea în care se suspectează că un nod defect din calea rețelei cauzează pierderea pachetelor. Tehnicianul are doar adresa IP a dispozitivului final și nu deține detalii despre dispozitivele intermediare. Ce comandă poate folosi pentru a identifica nodul defect?",
+        type: "single",
+        options: [
+          "ping",
+          "ipconfig /flushdns",
+          "tracert",
+          "ipconfig /displaydns"
+        ],
+        answer: [2]
+      },
+      {
+        text: "Un utilizator care nu se poate conecta la serverul de fișiere contactează helpdesk-ul. Tehnicianul îi cere utilizatorului să dea ping la adresa IP a gateway-ului implicit configurat pe stația de lucru. Care este scopul acestei comenzi ping?",
+        type: "single",
+        options: [
+          "Pentru a rezolva numele de domeniu al serverului de fișiere la adresa sa IP",
+          "Pentru a solicita gateway-ului să transmită cererea de conectare către serverul de fișiere",
+          "Pentru a testa dacă gazda poate ajunge la gazde din alte rețele",
+          "Pentru a obține o adresă IP dinamică de la server"
+        ],
+        answer: [2]
+      },
+      {
+        text: "Care este o funcție a comenzii tracert care o diferențiază de comanda ping, atunci când sunt folosite pe o stație de lucru?",
+        type: "single",
+        options: [
+          "Comanda tracert trimite un singur mesaj ICMP către fiecare hop din cale.",
+          "Comanda tracert ajunge la destinație mai rapid.",
+          "Comanda tracert este folosită pentru a testa conectivitatea între două dispozitive.",
+          "Comanda tracert afișează informații despre routerele din cale."
+        ],
+        answer: [3]
+      },
+      {
+        text: "Ce mesaj ICMP este folosit de utilitarul traceroute în procesul de identificare a căii dintre două gazde finale?",
+        type: "single",
+        options: [
+          "Redirect",
+          "Time exceeded (timp depășit)",
+          "Ping",
+          "Destination unreachable (destinație inaccesibilă)"
+        ],
+        answer: [1]
+      },
+      {
+        text: "Ce utilitar folosește protocolul ICMP (Internet Control Messaging Protocol)?",
+        type: "single",
+        options: [
+          "Ping",
+          "DNS",
+          "NTP",
+          "RIP"
+        ],
+        answer: [0]
+      },
+      {
+        text: "Ce protocol folosesc IPv4 și IPv6 pentru a furniza mesaje de eroare?",
+        type: "single",
+        options: [
+          "ICMP",
+          "ARP",
+          "NDP",
+          "DHCP"
+        ],
+        answer: [0]
+      },
+      {
+        text: "Un administrator de rețea testează conectivitatea folosind comanda ping pe un router. Ce simbol este afișat pentru a indica faptul că timpul a expirat în așteptarea unui mesaj ICMP echo reply?",
+        type: "single",
+        options: [
+          ". (punct)",
+          "U",
+          "!",
+          "$"
+        ],
+        answer: [0]
+      },
+      {
+        text: "Ce două lucruri pot fi determinate folosind comanda ping? (Alegeți două.)",
+        type: "multi",
+        choose: 2,
+        options: [
+          "Dispozitivul destinație este accesibil prin rețea",
+          "Timpul mediu în care fiecare router din cale dintre sursă și destinație răspunde",
+          "Adresa IP a routerului cel mai apropiat de dispozitivul destinație",
+          "Timpul mediu necesar unui pachet pentru a ajunge la destinație și răspunsului pentru a reveni la sursă",
+          "Numărul de routere între sursă și destinație"
+        ],
+        answer: [0, 3]
+      },
+      {
+        text: "Un utilizator sună să raporteze că un PC nu poate accesa internetul. Tehnicianul îi cere utilizatorului să emită comanda ping 127.0.0.1 într-o fereastră de linie de comandă. Utilizatorul raportează că rezultatul arată patru răspunsuri pozitive. Ce concluzie se poate trage din acest test de conectivitate?",
+        type: "single",
+        options: [
+          "PC-ul poate accesa rețeaua. Problema există dincolo de rețeaua locală.",
+          "Adresa IP obținută de la serverul DHCP este corectă.",
+          "PC-ul poate accesa Internetul, dar browserul web poate să nu funcționeze.",
+          "Implementarea TCP/IP este funcțională."
+        ],
+        answer: [3]
+      },
+      {
+        text: "Ce comandă poate fi folosită pentru a testa conectivitatea între două dispozitive folosind mesaje echo request și echo reply?",
+        type: "single",
+        options: [
+          "netstat",
+          "ping",
+          "ICMP",
+          "ipconfig"
+        ],
+        answer: [1]
+      },
+      {
+        text: "Ce conținut al unui câmp este folosit de ICMPv6 pentru a determina că un pachet a expirat?",
+        type: "single",
+        options: [
+          "Câmpul Hop Limit",
+          "Câmpul TTL",
+          "Câmpul CRC",
+          "Câmpul Time Exceeded"
+        ],
+        answer: [0]
+      },
+      {
+        text: "Ce protocol oferă feedback de la gazda destinație către gazda sursă despre erorile de livrare a pachetelor?",
+        type: "single",
+        options: [
+          "ARP",
+          "BOOTP",
+          "ICMP",
+          "DNS"
+        ],
+        answer: [2]
+      },
+      {
+        text: "Un administrator de rețea poate da ping cu succes serverului de la www.cisco.com, dar nu poate da ping serverului web al companiei aflat la un ISP dintr-un alt oraș. Ce instrument sau comandă ar ajuta la identificarea routerului specific unde pachetul a fost pierdut sau întârziat?",
+        type: "single",
+        options: [
+          "netstat",
+          "ipconfig",
+          "traceroute",
+          "telnet"
+        ],
+        answer: [2]
+      },
+      {
+        text: "Ce mesaj este trimis de o gazdă pentru a verifica unicitatea unei adrese IPv6 înainte de a o folosi?",
+        type: "single",
+        options: [
+          "Cerere ARP (ARP request)",
+          "Cerere echo (Echo request)",
+          "Solicitare vecin (Neighbor solicitation)",
+          "Solicitare router (Router solicitation)"
+        ],
+        answer: [2]
+      }
+    ];
+
+    const form = document.getElementById('quizForm');
+
+    function renderQuiz() {
+      form.innerHTML = '';
+      questions.forEach((q, qi) => {
+        const card = document.createElement('section');
+        card.className = 'quiz-card';
+        card.id = `q${qi}`;
+
+        const head = document.createElement('div');
+        head.className = 'q-head';
+        head.innerHTML = `<span class="badge">Q${qi + 1}</span><strong>Întrebarea ${qi + 1} din ${questions.length}</strong>`;
+        card.appendChild(head);
+
+        const question = document.createElement('div');
+        question.className = 'question';
+        question.textContent = q.text;
+        card.appendChild(question);
+
+        if (q.type === 'multi') {
+          const note = document.createElement('div');
+          note.className = 'multi-note';
+          note.textContent = `Alege ${q.choose} răspunsuri.`;
+          card.appendChild(note);
+        }
+
+        const optionsWrap = document.createElement('div');
+        optionsWrap.className = 'options';
+
+        q.options.forEach((opt, oi) => {
+          const label = document.createElement('label');
+          label.className = 'option';
+          label.setAttribute('data-q', qi);
+          label.setAttribute('data-o', oi);
+
+          const input = document.createElement('input');
+          input.type = q.type === 'single' ? 'radio' : 'checkbox';
+          input.name = `q${qi}`;
+          input.value = oi;
+
+          const span = document.createElement('span');
+          span.textContent = opt;
+
+          label.appendChild(input);
+          label.appendChild(span);
+          optionsWrap.appendChild(label);
+        });
+
+        card.appendChild(optionsWrap);
+
+        const feedback = document.createElement('div');
+        feedback.className = 'feedback';
+        feedback.id = `feedback-${qi}`;
+        card.appendChild(feedback);
+
+        form.appendChild(card);
+      });
+    }
+
+    function selectedFor(qi) {
+      return Array.from(document.querySelectorAll(`input[name="q${qi}"]:checked`)).map(el => Number(el.value)).sort((a, b) => a - b);
+    }
+
+    function sameArray(a, b) {
+      return a.length === b.length && a.every((v, i) => v === b[i]);
+    }
+
+    function checkQuiz() {
+      let correctCount = 0;
+
+      questions.forEach((q, qi) => {
+        const selected = selectedFor(qi);
+        const answer = [...q.answer].sort((a, b) => a - b);
+        const isCorrect = sameArray(selected, answer);
+        if (isCorrect) correctCount++;
+
+        document.querySelectorAll(`label[data-q="${qi}"]`).forEach(label => {
+          label.classList.remove('correct-highlight', 'wrong-highlight');
+          const oi = Number(label.getAttribute('data-o'));
+          if (answer.includes(oi)) label.classList.add('correct-highlight');
+          if (selected.includes(oi) && !answer.includes(oi)) label.classList.add('wrong-highlight');
+        });
+
+        const feedback = document.getElementById(`feedback-${qi}`);
+        const correctText = answer.map(i => q.options[i]).join(' / ');
+        feedback.className = `feedback ${isCorrect ? 'ok' : 'bad'}`;
+        feedback.innerHTML = isCorrect
+          ? 'Corect!'
+          : `Incorect.<div class="correct-answer">Răspuns corect: ${correctText}</div>`;
+      });
+
+      const percent = Math.round((correctCount / questions.length) * 100);
+      document.getElementById('scoreBox').textContent = `Scor: ${correctCount}/${questions.length} (${percent}%)`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetQuiz() {
+      document.querySelectorAll('input').forEach(input => input.checked = false);
+      document.querySelectorAll('.feedback').forEach(fb => {
+        fb.className = 'feedback';
+        fb.innerHTML = '';
+      });
+      document.querySelectorAll('label.option').forEach(label => {
+        label.classList.remove('correct-highlight', 'wrong-highlight');
+      });
+      document.getElementById('scoreBox').textContent = 'Scor: neverificat';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    renderQuiz();
+  </script>
+</body>
+</html>

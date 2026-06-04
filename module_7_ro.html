@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grile Cisco Modul 7 - Comutare Ethernet (Ethernet Switching)</title>
+  <style>
+    :root{--bg:#f4f7fb;--card:#fff;--text:#1f2937;--muted:#6b7280;--blue:#0ea5e9;--green:#16a34a;--red:#dc2626;--border:#e5e7eb;--soft:#eef6ff;}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+    header{background:linear-gradient(135deg,#0f766e,#0ea5e9);color:#fff;padding:28px 18px;text-align:center}
+    header h1{margin:0 0 8px;font-size:28px}
+    header p{margin:0;opacity:.95}
+    main{max-width:1000px;margin:24px auto;padding:0 16px 60px}
+    .toolbar{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:18px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .score{font-weight:700;font-size:18px}
+    button{border:none;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:700;background:#0ea5e9;color:white;transition:.15s}
+    button:hover{filter:brightness(.95)}
+    button.secondary{background:#64748b}
+    .question-card{background:var(--card);border:1px solid var(--border);border-radius:14px;margin:18px 0;padding:20px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .question-card h2{font-size:19px;margin:0 0 12px;color:#0f172a}
+    .meta{color:var(--muted);font-size:14px;margin-bottom:12px}
+    .option{display:block;border:1px solid var(--border);border-radius:10px;padding:11px 12px;margin:8px 0;background:#fff;cursor:pointer}
+    .option:hover{background:#f8fafc}
+    .option input{margin-right:10px;transform:scale(1.05)}
+    .feedback{display:none;margin-top:14px;border-radius:12px;padding:14px;border:1px solid var(--border);background:#f8fafc}
+    .feedback.correct{background:#ecfdf5;border-color:#86efac}
+    .feedback.incorrect{background:#fef2f2;border-color:#fecaca}
+    .answer{font-weight:700;margin-bottom:8px}
+    .explanation{background:#fff;border-left:4px solid var(--blue);padding:10px 12px;border-radius:8px;margin-top:8px}
+    .correctText{color:var(--green)}
+    .wrongText{color:var(--red)}
+    .note{font-size:13px;color:var(--muted);margin-top:8px}
+  </style>
+</head>
+<body>
+<header>
+  <h1>Grile Cisco Modul 7 - Comutare Ethernet (Ethernet Switching)</h1>
+  <p>Alege răspunsul/răspunsurile, apoi apasă „Verifică răspunsul". Explicațiile sunt incluse pentru fiecare întrebare.</p>
+</header>
+<main>
+  <div class="toolbar">
+    <div class="score" id="score">Scor: 0 / 14</div>
+    <div>
+      <button onclick="checkAll()">Verifică toate</button>
+      <button class="secondary" onclick="resetQuiz()">Resetează</button>
+    </div>
+  </div>
+  <div id="quiz"></div>
+</main>
+<script>
+const questions = [
+  {
+    q: "Care două caracteristici descriu tehnologia Ethernet? (Alege două.)",
+    type: "multi",
+    choose: 2,
+    options: [
+      "Folosește adrese MAC unice pentru a se asigura că datele sunt trimise la destinația corectă.",
+      "Folosește de obicei o medie de 16 Mbps pentru ratele de transfer de date.",
+      "Este susținută de standardele IEEE 802.5.",
+      "Este susținută de standardele IEEE 802.3.",
+      "Folosește o topologie inel."
+    ],
+    correct: [0,3],
+    explanation: "Standardul Ethernet 802.3 specifică că o rețea implementează metoda de control al accesului CSMA/CD. Fiecare nod din rețea are o adresă MAC unică pentru comunicare."
+  },
+  {
+    q: "Ce afirmație descrie o caracteristică a adreselor MAC?",
+    type: "single",
+    options: [
+      "Au o valoare binară de 32 de biți.",
+      "Sunt rutabile doar în rețeaua privată.",
+      "Sunt adăugate ca parte a unui PDU de Layer 3.",
+      "Trebuie să fie globale unice."
+    ],
+    correct: [3],
+    explanation: "Orice furnizor care vinde dispozitive Ethernet trebuie să se înregistreze la IEEE pentru a asigura un cod unic de 24 de biți, care devine primii 24 de biți ai adresei MAC. Ultimii 24 de biți sunt generați per dispozitiv hardware."
+  },
+  {
+    q: "Care este valoarea specială atribuită primilor 24 de biți ai unei adrese MAC multicast care transportă un pachet IPv4?",
+    type: "single",
+    options: ["FF-00-5E", "01-00-5E", "05-5E-00", "FF-FF-FF"],
+    correct: [1],
+    explanation: "Similar cu adresele IP multicast, există o valoare specială pentru adresele MAC multicast. Primii 24 de biți sunt setați în hex la 01-00-5E. Restul de 6 cifre hex derivă din ultimii 23 de biți ai multicast-ului IPv4."
+  },
+  {
+    q: "Ce va face un host dintr-o rețea Ethernet dacă primește un cadru cu o adresă MAC unicast destinație care nu se potrivește cu propria sa adresă MAC?",
+    type: "single",
+    options: [
+      "Va elimina cadrul de pe mediu.",
+      "Va desface cadrul data-link pentru a verifica adresa IP destinație.",
+      "Va transmite cadrul către următorul host.",
+      "Va arunca cadrul."
+    ],
+    correct: [3],
+    explanation: "Într-o rețea Ethernet, fiecare NIC verifică fiecare cadru primit pentru a vedea dacă adresa MAC destinație se potrivește. Dacă nu există potrivire, dispozitivul aruncă cadrul."
+  },
+  {
+    q: "Ce dispozitiv de rețea ia decizii de redirecționare pe baza adresei MAC destinație conținute în cadru?",
+    type: "single",
+    options: ["Switch", "Hub", "Repeater", "Router"],
+    correct: [0],
+    explanation: "Switch-urile sunt punctul central de conexiune al unui LAN și mențin un tabel de adrese MAC. Tabelul MAC asociază un număr de port cu o adresă MAC pentru fiecare dispozitiv interfață."
+  },
+  {
+    q: "Ce dispozitiv de rețea are funcția principală de a trimite date către o destinație specifică pe baza informațiilor din tabelul de adrese MAC?",
+    type: "single",
+    options: ["Router", "Switch", "Hub", "Modem"],
+    correct: [1],
+    explanation: "Dacă o adresă MAC este găsită în tabelul MAC, datele sunt trimise la portul asociat switch-ului. Dacă nu este găsită, datele sunt trimise la toate porturile care au dispozitive conectate."
+  },
+  {
+    q: "Care funcție sau operație este efectuată de subsublayer-ul LLC?",
+    type: "single",
+    options: [
+      "Este responsabil pentru controlul accesului la mediu.",
+      "Adaugă un header și trailer la un pachet pentru a forma un PDU OSI Layer 2.",
+      "Comunică cu straturile superioare ale protocolului.",
+      "Efectuează încapsularea datelor."
+    ],
+    correct: [2],
+    explanation: "Subsublayer-ul LLC Ethernet gestionează comunicarea între straturile superioare și cele inferioare ale stivei de protocoale. LLC este implementat în software și comunică cu straturile superioare ale aplicației."
+  },
+  {
+    q: "Ce se întâmplă cu cadrele runt primite de un switch Cisco Ethernet?",
+    type: "single",
+    options: [
+      "Cadrul este difuzat (broadcast) către toate celelalte dispozitive din aceeași rețea.",
+      "Cadrul este aruncat.",
+      "Cadrul este returnat dispozitivului de rețea sursă.",
+      "Cadrul este trimis la gateway-ul implicit."
+    ],
+    correct: [1],
+    explanation: "Dispozitivele Ethernet aruncă cadrele considerate runt (mai puțin de 64 de octeți) sau jumbo (mai mult de 1500 de octeți) pentru a conserva lățimea de bandă."
+  },
+  {
+    q: "Ce informații de adresare sunt înregistrate de un switch pentru a-și construi tabelul de adrese MAC?",
+    type: "single",
+    options: [
+      "Adresa Layer 3 destinație a pachetelor primite",
+      "Adresa Layer 2 destinație a cadrelor ieșite",
+      "Adresa Layer 3 sursă a pachetelor ieșite",
+      "Adresa Layer 2 sursă a cadrelor primite"
+    ],
+    correct: [3],
+    explanation: "Un switch își construiește tabelul MAC inspectând cadrele Layer 2 primite și înregistrând adresa MAC sursă găsită în header-ul cadrului, asociată cu portul pe care a fost primit."
+  },
+  {
+    q: "Ce este auto-MDIX?",
+    type: "single",
+    options: [
+      "Un tip de switch Cisco",
+      "Un tip de conector Ethernet",
+      "O funcție pentru detectarea automată a vitezei și duplexului",
+      "O funcție care detectează tipul de cablu Ethernet"
+    ],
+    correct: [3],
+    explanation: "Auto-MDIX este o funcție activată pe switch-urile Cisco mai recente care permite switch-ului să detecteze și să folosească orice tip de cablu conectat la un anumit port."
+  },
+  {
+    q: "Ce tip de adresă este 01-00-5E-0A-00-02?",
+    type: "single",
+    options: [
+      "O adresă care se potrivește fiecărui host din rețea",
+      "O adresă care se potrivește unui grup specific de hosturi",
+      "O adresă care se potrivește fiecărui host din subrețeaua locală",
+      "O adresă care se potrivește unui singur host specific"
+    ],
+    correct: [1],
+    explanation: "Adresa MAC multicast este o valoare specială care începe cu 01-00-5E în hexazecimal. Permite unui dispozitiv sursă să trimită un pachet către un grup de dispozitive."
+  },
+  {
+    q: "Care afirmație este adevărată despre adresele MAC?",
+    type: "single",
+    options: [
+      "Adresele MAC sunt implementate prin software.",
+      "Un NIC are nevoie de adresă MAC doar dacă este conectat la un WAN.",
+      "Primii trei octeți sunt utilizați de OUI-ul atribuit furnizorului.",
+      "ISO este responsabil pentru reglementările adreselor MAC."
+    ],
+    correct: [2],
+    explanation: "O adresă MAC este formată din 6 octeți. Primii 3 octeți sunt folosiți pentru identificarea furnizorului (OUI), iar ultimii 3 trebuie să fie o valoare unică în cadrul aceluiași OUI. IEEE reglementează adresele MAC."
+  },
+  {
+    q: "Care sunt cele două dimensiuni (minimă și maximă) ale unui cadru Ethernet? (Alege două.)",
+    type: "multi",
+    choose: 2,
+    options: ["56 octeți", "64 octeți", "128 octeți", "1024 octeți", "1518 octeți"],
+    correct: [1,4],
+    explanation: "Cadrul Ethernet minim este de 64 de octeți. Cadrul Ethernet maxim așteptat este de 1518 de octeți. Un tehnician de rețea trebuie să cunoască dimensiunile pentru a recunoaște cadrele runt și jumbo."
+  },
+  {
+    q: "Care două funcții sau operații sunt efectuate de subsublayer-ul MAC? (Alege două.)",
+    type: "multi",
+    choose: 2,
+    options: [
+      "Este responsabil pentru controlul accesului la mediu (Media Access Control).",
+      "Efectuează funcția software-ului driver NIC.",
+      "Adaugă un header și trailer pentru a forma un PDU OSI Layer 2.",
+      "Gestionează comunicarea între straturile superioare și cele inferioare.",
+      "Adaugă informații de control la datele stratului protocolului de rețea."
+    ],
+    correct: [0,2],
+    explanation: "Subsublayer-ul MAC este cel mai jos dintre cele două subsublayer-uri ale legăturii de date și este cel mai apropiat de stratul fizic. Cele două funcții principale ale MAC sunt: încapsularea datelor de la straturile superioare și controlul accesului la mediu."
+  }
+];
+
+function renderQuiz(){
+  const quiz = document.getElementById('quiz');
+  quiz.innerHTML = '';
+  questions.forEach((item, index) => {
+    const card = document.createElement('section');
+    card.className = 'question-card';
+    const typeText = item.type === 'multi' ? `Alege ${item.choose} răspunsuri` : 'Alege un singur răspuns';
+    card.innerHTML = `
+      <h2>Întrebarea ${index + 1}. ${item.q}</h2>
+      <div class="meta">${typeText}</div>
+      <div class="options">
+        ${item.options.map((opt, i) => `
+          <label class="option">
+            <input type="${item.type === 'multi' ? 'checkbox' : 'radio'}" name="q${index}" value="${i}">
+            ${opt}
+          </label>`).join('')}
+      </div>
+      <button onclick="checkQuestion(${index})">Verifică răspunsul</button>
+      <div class="feedback" id="feedback-${index}"></div>
+    `;
+    quiz.appendChild(card);
+  });
+}
+
+function selectedAnswers(index){
+  return [...document.querySelectorAll(`input[name=q${index}]:checked`)].map(el => Number(el.value)).sort((a,b)=>a-b);
+}
+function arraysEqual(a,b){return a.length===b.length && a.every((v,i)=>v===b[i]);}
+function answerText(q){return q.correct.map(i => q.options[i]).join(' | ');}
+function checkQuestion(index){
+  const q = questions[index];
+  const selected = selectedAnswers(index);
+  const fb = document.getElementById(`feedback-${index}`);
+  const ok = arraysEqual(selected, [...q.correct].sort((a,b)=>a-b));
+  fb.className = `feedback ${ok ? 'correct' : 'incorrect'}`;
+  fb.style.display = 'block';
+  if(selected.length === 0){
+    fb.innerHTML = `<div class="answer wrongText">Nu ai selectat niciun răspuns.</div><div class="answer">Răspuns corect: ${answerText(q)}</div><div class="explanation"><strong>Explicație:</strong> ${q.explanation}</div>`;
+  } else {
+    fb.innerHTML = `<div class="answer ${ok ? 'correctText' : 'wrongText'}">${ok ? 'Corect!' : 'Incorect.'}</div><div class="answer">Răspuns corect: ${answerText(q)}</div><div class="explanation"><strong>Explicație:</strong> ${q.explanation}</div>`;
+  }
+  updateScore();
+}
+function checkAll(){questions.forEach((_,i)=>checkQuestion(i)); window.scrollTo({top:0,behavior:'smooth'});}
+function updateScore(){
+  let score=0;
+  questions.forEach((q,i)=>{ if(arraysEqual(selectedAnswers(i), [...q.correct].sort((a,b)=>a-b))) score++; });
+  document.getElementById('score').textContent = `Scor: ${score} / ${questions.length}`;
+}
+function resetQuiz(){
+  document.querySelectorAll('input').forEach(i=>i.checked=false);
+  document.querySelectorAll('.feedback').forEach(f=>{f.style.display='none'; f.innerHTML='';});
+  updateScore();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+renderQuiz();
+</script>
+</body>
+</html>
