@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grile Suplimentare - Retele de Calculatoare</title>
+  <style>
+    :root {
+      --bg: #f4f7fb; --card: #ffffff; --text: #1f2937; --muted: #6b7280;
+      --accent: #0ea5e9; --accent-dark: #0284c7; --border: #dbe3ef; --soft: #eef6ff;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: linear-gradient(180deg, #eef6ff 0%, var(--bg) 240px); color: var(--text); line-height: 1.5; }
+    header { max-width: 1050px; margin: 0 auto; padding: 34px 18px 18px; }
+    h1 { margin: 0 0 8px; font-size: clamp(22px, 4vw, 36px); }
+    .subtitle { color: var(--muted); margin: 0; max-width: 780px; }
+    main { max-width: 1050px; margin: 0 auto; padding: 12px 18px 50px; }
+    .toolbar { position: sticky; top: 0; z-index: 20; background: rgba(244,247,251,0.92); backdrop-filter: blur(8px); border: 1px solid var(--border); border-radius: 16px; padding: 14px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between; margin: 0 0 18px; box-shadow: 0 10px 24px rgba(15,23,42,0.06); }
+    .toolbar .score { font-weight: 700; color: var(--text); }
+    button { border: 0; border-radius: 12px; padding: 11px 16px; font-weight: 700; cursor: pointer; transition: transform .08s ease, background .2s ease; }
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+    .primary { background: var(--accent); color: white; }
+    .primary:hover { background: var(--accent-dark); }
+    .secondary { background: #e5e7eb; color: #111827; }
+    .quiz-card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 22px; margin: 18px 0; box-shadow: 0 10px 28px rgba(15,23,42,0.05); }
+    .q-head { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; }
+    .badge { display: inline-flex; align-items: center; justify-content: center; min-width: 42px; height: 32px; padding: 0 10px; border-radius: 999px; background: var(--soft); color: var(--accent-dark); font-weight: 800; }
+    .multi-note { color: var(--muted); font-size: 14px; margin-top: 6px; }
+    .question { font-size: 17px; font-weight: 700; margin: 8px 0 14px; }
+    .options { display: grid; gap: 10px; margin-top: 12px; }
+    label.option { display: grid; grid-template-columns: 26px 1fr; gap: 12px; align-items: start; padding: 13px 14px; border: 1px solid var(--border); border-radius: 12px; background: #fff; cursor: pointer; }
+    label.option:hover { background: #f8fafc; }
+    input { margin-top: 4px; transform: scale(1.15); }
+    .feedback { display: none; margin-top: 15px; padding: 13px 14px; border-radius: 12px; font-weight: 700; }
+    .feedback.ok { display: block; background: #dcfce7; color: #14532d; border: 1px solid #86efac; }
+    .feedback.bad { display: block; background: #fee2e2; color: #7f1d1d; border: 1px solid #fca5a5; }
+    .correct-answer { margin-top: 8px; font-weight: 400; }
+    .correct-highlight { border-color: #86efac !important; background: #f0fdf4 !important; }
+    .wrong-highlight { border-color: #fca5a5 !important; background: #fff1f2 !important; }
+    footer { color: var(--muted); text-align: center; font-size: 13px; padding: 12px 0 34px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Grile Suplimentare - Retele de Calculatoare</h1>
+    <p class="subtitle">Quiz interactiv cu 66 intrebari din examene si teste ASE. Bifeaza raspunsul/raspunsurile, apoi apasa Verifica raspunsurile.</p>
+  </header>
+  <main>
+    <section class="toolbar">
+      <div class="score" id="scoreBox">Scor: neverificat</div>
+      <div>
+        <button class="primary" onclick="checkQuiz()">Verifica raspunsurile</button>
+        <button class="secondary" onclick="resetQuiz()">Reseteaza</button>
+      </div>
+    </section>
+    <form id="quizForm"></form>
+  </main>
+  <footer>Fisier HTML generat pentru exersare individuala.</footer>
+  <script>
+    const questions = [
+      {
+        text: "Care dintre urmatoarele adrese reprezinta cea mai scurta abreviere pentru adresa IPv6: 3FFE:1044:0000:0000:0000:00AB:0000:0057?",
+        type: "single",
+        options: ["3FFE:1044:0:0:0:AB:0:57", "3FFE:1044:0000:0000:0000:00AB:0057", "3FFE:1044:0:0:0:00AB::57", "3FFE:1044::AB:57", "3FFE:1044:0000:0000:0000:00AB:0000:57"],
+        answer: [3]
+      },
+      {
+        text: "In ce situatii protocolul UDP este preferat fata de protocolul TCP? (Alegeti doua)",
+        type: "multi",
+        choose: 2,
+        options: ["Atunci cand dimensiunea overhead-ului nu este o problema", "Atunci cand este necesar un mecanism de transmisie mai rapida a datelor", "Atunci cand porturile destinatie sunt dinamice", "Atunci cand aplicatiile necesita ca datele sa ajunga garantat la destinatie, in ordinea specificata", "Atunci cand aplicatiile nu necesita confirmari de primire a datelor la destinatie"],
+        answer: [1, 4]
+      },
+      {
+        text: "Ce face un client atunci cand are datagrame UDP de transmis?",
+        type: "single",
+        options: ["Interogheaza serverul pentru a vedea daca acesta poate receptiona date.", "Nimic special; le transmite direct.", "Trimite catre server un mesaj de tip SYN pentru sincronizarea transmisiunii.", "Trimite in prealabil o versiune simplificata 3-way-handshake catre server."],
+        answer: [1]
+      },
+      {
+        text: "Ce domeniu de valori este rezervat pentru adresele IPv4 multicast?",
+        type: "single",
+        options: ["127.0.0.0 - 127.255.255.255", "224.0.0.0 - 239.255.255.255", "127.0.0.0 - 128.255.255.255", "169.254.0.0 - 169.254.255.255", "240.0.0.0 - 254.255.255.255"],
+        answer: [1]
+      },
+      {
+        text: "O companie are nevoie de anumite servicii de hosting din partea unui furnizor de servicii Internet. Aceste servicii includ gazduire web, transfer de fisiere si e-mail. Ce protocoale reprezinta aceste trei aplicatii cheie? (Alegeti 3)",
+        type: "multi",
+        choose: 3,
+        options: ["SNMP", "HTTP", "DHCP", "FTP", "SMTP", "DNS"],
+        answer: [1, 3, 4]
+      },
+      {
+        text: "Care este unul dintre avantajele header-ului simplificat in IPv6 in comparatie cu IPv4?",
+        type: "single",
+        options: ["Administrarea mai eficienta a pachetelor de date", "Adrese IP sursa si destinatie de dimensiuni mai mici", "Verificari mai putin laborioase ale pachetelor", "Existenta unui header de lungime mai mica"],
+        answer: [0]
+      },
+      {
+        text: "In ce model de networking sunt folosite eDonkey, eMule, BitTorrent, Bitcoin?",
+        type: "single",
+        options: ["Client/Server", "Point-to-Point", "Peer-to-Peer", "One-to-Many", "Master-Slave"],
+        answer: [2]
+      },
+      {
+        text: "Un computer poate accesa echipamente din aceeasi retea dar nu poate accesa echipamente din alte retele. Care ar putea fi o cauza a acestei probleme?",
+        type: "single",
+        options: ["Computerul are un default gateway configurat gresit.", "Computerul are configurat un subnet mask gresit.", "Computerul are o adresa IP invalida.", "Cablul nu este corect inserat in placa de retea."],
+        answer: [0]
+      },
+      {
+        text: "Care dintre urmatoarele adrese sunt adrese publice valide? (Alegeti trei)",
+        type: "multi",
+        choose: 3,
+        options: ["198.133.219.17", "192.168.1.245", "128.107.12.117", "64.104.78.227", "10.15.250.5"],
+        answer: [0, 2, 3]
+      },
+      {
+        text: "Ce nivel din modelul TCP/IP este folosit pentru formatarea, compresia si criptarea datelor?",
+        type: "single",
+        options: ["Prezentare", "Acces la retea", "Aplicatie", "Transport", "Sesiune"],
+        answer: [2]
+      },
+      {
+        text: "Cum se numeste un mesaj trimis catre toate adresele de host dintr-o retea?",
+        type: "single",
+        options: ["broadcast", "anycast", "allcast", "unicast", "multicast"],
+        answer: [0]
+      },
+      {
+        text: "Cum se numeste datagrama de la nivelul transport din modelul ISO-OSI?",
+        type: "single",
+        options: ["Data", "Pachet", "Bit", "Segment", "Frame"],
+        answer: [3]
+      },
+      {
+        text: "Ce afirmatie descrie o caracteristica a protocolului IP?",
+        type: "single",
+        options: ["IP se bazeaza pe protocoale de nivel superior pentru administrarea pachetelor ce ajung intr-o ordine incorecta la destinatie.", "Adresele MAC sunt folosite in timpul incapsularii IP.", "Incapsularea IP se modifica in functie de mediul de comunicatie.", "IP se bazeaza pe protocoale ale nivelului 2 pentru controlul erorii datelor."],
+        answer: [0]
+      },
+      {
+        text: "Atunci cand adresarea IPv4 este configurata manual pe un server web, ce proprietate a configurarii IPv4 identifica portiunea de retea si cea de host pentru o adresa IPv4?",
+        type: "single",
+        options: ["Default gateway", "Adresa serverului DNS", "Adresa serverului DHCP", "Adresa serverului POP3", "Subnet mask"],
+        answer: [4]
+      },
+      {
+        text: "Ce protocoale de nivel aplicatie folosesc TCP? (Alegeti 3)",
+        type: "multi",
+        choose: 3,
+        options: ["TFTP", "SMTP", "SNMP", "FTP", "HTTP"],
+        answer: [1, 3, 4]
+      },
+      {
+        text: "Ce au in comun modelele peer-to-peer si modelul client/server?",
+        type: "single",
+        options: ["Ambele modele pot fi utilizate doar in retele cablate", "Ambele modele necesita protocoale bazate pe suita TCP/IP", "Ambele modele poseda servere dedicate", "Ambele modele ofera suport atat pentru rolul client cat si pentru rolul de server"],
+        answer: [1]
+      },
+      {
+        text: "Care este factorul ce determina dimensiunea ferestrei TCP (window size)?",
+        type: "single",
+        options: ["Cantitatea de date ce poate fi trimisa de catre sursa la un moment dat", "Cantitatea de date ce va fi transmisa", "Cantitatea de date ce poate fi procesata de catre destinatie la un moment dat", "Numarul de servicii incluse in segmentul TCP"],
+        answer: [2]
+      },
+      {
+        text: "Care sunt cele doua nivele din modelul OSI ce au aceeasi functionalitate cu a unui singur nivel din modelul TCP/IP?",
+        type: "multi",
+        choose: 2,
+        options: ["Legatura de date", "Sesiune", "Fizic", "Transport", "Retea"],
+        answer: [0, 2]
+      },
+      {
+        text: "Care este termenul ce descrie o retea a unei organizatii ce ofera acces sigur si securizat indivizilor ce lucreaza pentru o alta organizatie?",
+        type: "single",
+        options: ["Extranet", "QoS", "SafeNet", "BYOD", "Cloud computing"],
+        answer: [0]
+      },
+      {
+        text: "Cati biti trebuie imprumutati din portiunea de host pentru a asigura adrese pentru 5 retele conectate la un ruter?",
+        type: "single",
+        options: ["4", "5", "2", "3"],
+        answer: [3]
+      },
+      {
+        text: "De ce utilizeaza HTTP protocolul TCP pentru transportul datelor?",
+        type: "single",
+        options: ["Deoarece HTTP este un protocol de tipul best-effort", "Deoarece erorile generate de transmisiune pot fi tolerate cu usurinta", "Pentru a asigura o viteza maxima de upload", "Pentru a asigura o viteza maxima de download", "Deoarece HTTP necesita un transport fiabil al datelor"],
+        answer: [4]
+      },
+      {
+        text: "Care este una dintre caracteristicile de baza ale protocolului IP?",
+        type: "single",
+        options: ["segmentarea datelor", "connectionless", "ordonarea pachetelor de date", "fiabilitatea transportului de date", "dependenta de mediul de comunicatie"],
+        answer: [1]
+      },
+      {
+        text: "Cate adrese de host sunt disponibile in reteaua 192.168.10.128/26?",
+        type: "single",
+        options: ["64", "32", "62", "60", "30"],
+        answer: [2]
+      },
+      {
+        text: "Ce model de networking este folosit atunci cand un autor incarca un fisier document catre un file server al unui editor de carte?",
+        type: "single",
+        options: ["Master-Slave", "Point-to-Point", "Peer-to-Peer", "Client-Server", "One-to-One"],
+        answer: [3]
+      },
+      {
+        text: "Care este notatia prefixata pentru un subnet mask egal cu 255.255.255.224?",
+        type: "single",
+        options: ["/25", "/27", "/26", "/29", "/28"],
+        answer: [1]
+      },
+      {
+        text: "Ce informatie este utilizata de catre TCP pentru reasamblarea si reordonarea segmentelor receptionate?",
+        type: "single",
+        options: ["Numerele confirmarilor", "Numarul de fragmente", "Numerele de porturi de comunicatie", "Numerele adreselor IP", "Numerele de secvente"],
+        answer: [4]
+      },
+      {
+        text: "Care este protocolul des utilizat de catre aplicatii peer-to-peer precum WireShare, Bearshare, Shareaza?",
+        type: "single",
+        options: ["POP3", "Ethernet", "Gnutella", "P2P", "SMTP"],
+        answer: [2]
+      },
+      {
+        text: "Ce nivel din modelul TCP/IP este responsabil cu rutarea mesajelor intr-o inter-retea?",
+        type: "single",
+        options: ["Aplicatie", "Transport", "Retea", "Acces la retea", "Internet"],
+        answer: [4]
+      },
+      {
+        text: "Ce este Internetul?",
+        type: "single",
+        options: ["Ofera acces la retea pentru echipamente mobile", "Ofera conexiuni prin intermediul unor retele interconectate la nivel global.", "Este o retea privata a unei organizatii ce are conexiuni locale si globale.", "Este o retea bazata pe tehnologia Ethernet."],
+        answer: [1]
+      },
+      {
+        text: "Un utilizator doreste sa acceseze reteaua organizatiei de la distanta, in mod securizat. Ce tehnologie specifica de retea permite acest lucru?",
+        type: "single",
+        options: ["VPN", "ACL", "BYOD", "IPS"],
+        answer: [0]
+      },
+      {
+        text: "Ce caracteristica a unei retele permite sa creasca pentru a oferi suport pentru noi utilizatori si aplicatii, fara a avea un impact negativ asupra performantelor serviciilor oferite utilizatorilor existenti?",
+        type: "single",
+        options: ["Calitatea serviciilor (QoS)", "Scalabilitatea", "Integritatea", "Toleranta la erori"],
+        answer: [1]
+      },
+      {
+        text: "Ce nivel din modelul ISO-OSI defineste serviciile pentru segmentarea si reasamblarea datelor comunicatiilor individuale intre aplicatii?",
+        type: "single",
+        options: ["Aplicatie", "Transport", "Legatura de date", "Fizic", "Sesiune"],
+        answer: [1]
+      },
+      {
+        text: "Care dintre urmatoarele protocoale actioneaza la nivelul Internet? (Alegeti doua)",
+        type: "multi",
+        choose: 2,
+        options: ["ICMP", "BOOTP", "IP", "PPP", "POP"],
+        answer: [0, 2]
+      },
+      {
+        text: "In cadrul comunicatiilor dintre computere, care este rolul codificarii mesajelor?",
+        type: "single",
+        options: ["Pentru negocierea unei sincronizari corecte a comunicatiei", "Pentru a divide mesajele mai lungi in frame-uri de lungime mai mica", "Pentru a interpreta informatia", "Pentru a converti informatia intr-o forma specifica transmisiunii"],
+        answer: [3]
+      },
+      {
+        text: "Care este rolul protocolului ARP in retea?",
+        type: "single",
+        options: ["Sa asocieze adresa IP a hostului sursa cu adresa IP a destinatiei", "Sa asocieze adresa IP cu o adresa MAC", "Sa asigure rutarea corecta intre subretele", "Sa defineasca modul de acces la mediu"],
+        answer: [1]
+      },
+      {
+        text: "Care sunt cele doua sub-nivele ale nivelului de legatura de date?",
+        type: "single",
+        options: ["IP si Ethernet", "MAC si LLC", "MAC si ARP", "Ethernet si Wi-Fi"],
+        answer: [1]
+      },
+      {
+        text: "Ce tip de mesaj ARP este transmis pentru a afla adresa MAC corespunzatoare unei adrese IP?",
+        type: "single",
+        options: ["ARP Echo", "ARP Reply", "ARP Request", "ARP Discover"],
+        answer: [2]
+      },
+      {
+        text: "Care sunt doua caracteristici ale protocolului IPv6? (Alegeti doua)",
+        type: "multi",
+        choose: 2,
+        options: ["Adresele sunt de 32 de biti", "Nu include suport pentru QoS", "Utilizeaza autoconfigurarea adreselor", "Include un header mai simplu", "Nu permite multicast"],
+        answer: [2, 3]
+      },
+      {
+        text: "Ce tip de adresa IPv6 incepe cu FE80?",
+        type: "single",
+        options: ["Adresa multicast", "Adresa de link-local", "Adresa globala", "Adresa loopback"],
+        answer: [1]
+      },
+      {
+        text: "Ce inseamna NAT?",
+        type: "single",
+        options: ["Network Address Translation", "Network Access Tool", "Net Authentication Type", "Node Address Test"],
+        answer: [0]
+      },
+      {
+        text: "Ce tip de mesaje foloseste protocolul ICMP?",
+        type: "single",
+        options: ["Mesaje de semnalizare si control", "Mesaje de criptare", "Mesaje de autentificare", "Mesaje de aplicare"],
+        answer: [0]
+      },
+      {
+        text: "Ce utilitar foloseste ICMP pentru a testa conectivitatea intre doua echipamente?",
+        type: "single",
+        options: ["telnet", "ipconfig", "ping", "ssh"],
+        answer: [2]
+      },
+      {
+        text: "Ce protocol se utilizeaza pentru a obtine automat o adresa IP?",
+        type: "single",
+        options: ["HTTP", "DNS", "DHCP", "FTP"],
+        answer: [2]
+      },
+      {
+        text: "Ce protocol este folosit pentru transmiterea e-mailurilor?",
+        type: "single",
+        options: ["POP3", "SMTP", "IMAP", "FTP"],
+        answer: [1]
+      },
+      {
+        text: "Ce aplicatie utilizeaza protocolul HTTP?",
+        type: "single",
+        options: ["Transfer de fisiere", "Acces la servere de mail", "Navigare pe web", "Monitorizare de retea"],
+        answer: [2]
+      },
+      {
+        text: "Care este portul standard pentru HTTPS?",
+        type: "single",
+        options: ["20", "21", "80", "443"],
+        answer: [3]
+      },
+      {
+        text: "Ce tip de retea este formata din dispozitive conectate intr-o locatie geografica restransa?",
+        type: "single",
+        options: ["MAN", "WAN", "LAN", "PAN"],
+        answer: [2]
+      },
+      {
+        text: "Ce dispozitiv conecteaza retele diferite si transmite pachete intre ele?",
+        type: "single",
+        options: ["Switch", "Router", "Hub", "Repeater"],
+        answer: [1]
+      },
+      {
+        text: "Ce reprezinta simbolul RJ din RJ-45?",
+        type: "single",
+        options: ["Registered Jack", "Routed Jumper", "Relay Jumper", "Routed Jack"],
+        answer: [0]
+      },
+      {
+        text: "Care este lungimea unei adrese MAC?",
+        type: "single",
+        options: ["16 biti", "32 biti", "64 biti", "48 biti", "128 biti"],
+        answer: [3]
+      },
+      {
+        text: "In care tip de topologie echipamentele sunt conectate la un hub central?",
+        type: "single",
+        options: ["Stea", "Inel", "Bus", "Plasa (Mesh)", "Linie"],
+        answer: [0]
+      },
+      {
+        text: "Ce tip de retea foloseste protocolul CSMA/CD pentru controlul coliziunilor?",
+        type: "single",
+        options: ["Wi-Fi", "Token Ring", "Ethernet", "FDDI", "ATM"],
+        answer: [2]
+      },
+      {
+        text: "Care dintre urmatoarele adrese IP apartin clasei B? (Alegeti doua)",
+        type: "multi",
+        choose: 2,
+        options: ["10.5.5.1", "129.5.5.255", "192.168.1.1", "150.0.0.127", "224.0.0.1"],
+        answer: [1, 3]
+      },
+      {
+        text: "Care este scopul campului FCS dintr-un frame?",
+        type: "single",
+        options: ["Identifica adresa MAC sursa", "Specifica tipul protocolului de nivel superior", "Indica lungimea frame-ului", "Verifica daca au aparut erori la transmisie si/sau receptie"],
+        answer: [3]
+      },
+      {
+        text: "Ce indica un ping cu succes catre adresa IPv6 ::1?",
+        type: "single",
+        options: ["Gazda este cablata corect.", "Adresa link-local este configurata corect.", "Toate hosturile din link-ul local sunt disponibile.", "Adresa de gateway implicit este configurata corect.", "Protocolul IP este corect instalat pe calculator."],
+        answer: [4]
+      },
+      {
+        text: "Cate adrese de host utilizabile sunt in sub-reteaua 192.168.1.32/27?",
+        type: "single",
+        options: ["14", "16", "28", "32", "30"],
+        answer: [4]
+      },
+      {
+        text: "Care este ordinea corecta a stivei de protocoale pentru o cerere HTTP?",
+        type: "single",
+        options: ["HTTP, IP, TCP, Ethernet", "HTTP, TCP, IP, Ethernet", "Ethernet, IP, TCP, HTTP", "TCP, HTTP, IP, Ethernet"],
+        answer: [1]
+      },
+      {
+        text: "In ce sub-retea se afla adresa 172.16.134.56 cu subnet mask 255.255.255.224?",
+        type: "single",
+        options: ["172.16.134.32", "172.16.134.0", "172.16.134.64", "172.16.134.48", "172.16.134.16"],
+        answer: [3]
+      },
+      {
+        text: "Ce se obtine prin AND intre IP 130.5.200.10 si subnet mask 255.255.240.0?",
+        type: "single",
+        options: ["130.5.200.0", "130.5.192.0", "130.5.208.0", "130.5.240.0"],
+        answer: [1]
+      },
+      {
+        text: "Care dintre urmatoarele sunt adrese IP private? (Alegeti trei)",
+        type: "multi",
+        choose: 3,
+        options: ["198.133.219.17", "10.35.66.70", "192.168.99.5", "172.18.88.90", "64.104.78.227"],
+        answer: [1, 2, 3]
+      },
+      {
+        text: "Cate subretele se pot defini pentru 172.16.0.0 cu masca 255.255.240.0?",
+        type: "single",
+        options: ["4", "8", "16", "32", "64"],
+        answer: [2]
+      },
+      {
+        text: "Ce masca trebuie aplicata unei adrese din clasa C pentru 2 subretele a cate 35 hosturi?",
+        type: "single",
+        options: ["255.255.255.192", "255.255.255.128", "255.255.255.224", "255.255.255.240"],
+        answer: [0]
+      },
+      {
+        text: "Cate adrese de host valide sunt in 198.197.196.16/30?",
+        type: "single",
+        options: ["2", "4", "6", "8", "14"],
+        answer: [0]
+      },
+      {
+        text: "La ce subretea apartine IP 172.16.2.160 cu subnet mask 255.255.255.192?",
+        type: "single",
+        options: ["172.16.2.0", "172.16.2.64", "172.16.2.192", "172.16.2.128"],
+        answer: [3]
+      },
+      {
+        text: "Ce subnet mask se foloseste pentru max. 126 hosturi in subnet pe o adresa 172.35.21.12?",
+        type: "single",
+        options: ["255.255.255.0", "255.255.255.192", "255.255.255.128", "255.255.255.224"],
+        answer: [2]
+      },
+      {
+        text: "Pentru 132.15.136.2/18 ce subretea corespunde?",
+        type: "single",
+        options: ["132.15.192.0", "132.15.128.0", "132.15.136.0", "132.15.0.0"],
+        answer: [1]
+      }
+    ];
+    const form = document.getElementById('quizForm');
+    function renderQuiz() {
+      form.innerHTML = '';
+      questions.forEach(function(q, qi) {
+        var card = document.createElement('section');
+        card.className = 'quiz-card';
+        card.id = 'q' + qi;
+        var head = document.createElement('div');
+        head.className = 'q-head';
+        head.innerHTML = '<span class="badge">Q' + (qi+1) + '</span><strong>Intrebarea ' + (qi+1) + ' din ' + questions.length + '</strong>';
+        card.appendChild(head);
+        var question = document.createElement('div');
+        question.className = 'question';
+        question.textContent = q.text;
+        card.appendChild(question);
+        if (q.type === 'multi') {
+          var note = document.createElement('div');
+          note.className = 'multi-note';
+          note.textContent = 'Alege ' + q.choose + ' raspunsuri.';
+          card.appendChild(note);
+        }
+        var optionsWrap = document.createElement('div');
+        optionsWrap.className = 'options';
+        q.options.forEach(function(opt, oi) {
+          var label = document.createElement('label');
+          label.className = 'option';
+          label.setAttribute('data-q', qi);
+          label.setAttribute('data-o', oi);
+          var input = document.createElement('input');
+          input.type = q.type === 'single' ? 'radio' : 'checkbox';
+          input.name = 'q' + qi;
+          input.value = oi;
+          var span = document.createElement('span');
+          span.textContent = opt;
+          label.appendChild(input);
+          label.appendChild(span);
+          optionsWrap.appendChild(label);
+        });
+        card.appendChild(optionsWrap);
+        var feedback = document.createElement('div');
+        feedback.className = 'feedback';
+        feedback.id = 'feedback-' + qi;
+        card.appendChild(feedback);
+        form.appendChild(card);
+      });
+    }
+    function selectedFor(qi) {
+      return Array.from(document.querySelectorAll('input[name="q' + qi + '"]:checked')).map(function(el) { return Number(el.value); }).sort(function(a,b){return a-b;});
+    }
+    function sameArray(a, b) {
+      return a.length === b.length && a.every(function(v,i){return v===b[i];});
+    }
+    function checkQuiz() {
+      var correctCount = 0;
+      questions.forEach(function(q, qi) {
+        var selected = selectedFor(qi);
+        var answer = q.answer.slice().sort(function(a,b){return a-b;});
+        var isCorrect = sameArray(selected, answer);
+        if (isCorrect) correctCount++;
+        document.querySelectorAll('label[data-q="' + qi + '"]').forEach(function(label) {
+          label.classList.remove('correct-highlight', 'wrong-highlight');
+          var oi = Number(label.getAttribute('data-o'));
+          if (answer.indexOf(oi) >= 0) label.classList.add('correct-highlight');
+          if (selected.indexOf(oi) >= 0 && answer.indexOf(oi) < 0) label.classList.add('wrong-highlight');
+        });
+        var feedback = document.getElementById('feedback-' + qi);
+        var correctText = answer.map(function(i){return q.options[i];}).join(' / ');
+        feedback.className = 'feedback ' + (isCorrect ? 'ok' : 'bad');
+        feedback.innerHTML = isCorrect ? 'Corect!' : 'Incorect.<div class="correct-answer">Raspuns corect: ' + correctText + '</div>';
+      });
+      var percent = Math.round((correctCount / questions.length) * 100);
+      document.getElementById('scoreBox').textContent = 'Scor: ' + correctCount + '/' + questions.length + ' (' + percent + '%)';
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+    function resetQuiz() {
+      document.querySelectorAll('input').forEach(function(input){input.checked=false;});
+      document.querySelectorAll('.feedback').forEach(function(fb){fb.className='feedback';fb.innerHTML='';});
+      document.querySelectorAll('label.option').forEach(function(label){label.classList.remove('correct-highlight','wrong-highlight');});
+      document.getElementById('scoreBox').textContent = 'Scor: neverificat';
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+    renderQuiz();
+  </script>
+</body>
+</html>
